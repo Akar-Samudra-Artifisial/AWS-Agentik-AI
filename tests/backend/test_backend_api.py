@@ -56,6 +56,22 @@ def test_auth_rejects_missing_or_wrong_key(
     assert resp.json()["error"]["code"] == "unauthorized"
 
 
+@pytest.mark.parametrize(
+    "path", ["/api/health", "/api/cases", "/api/approvals/APR-0001/decision"]
+)
+def test_cors_preflight_is_204_without_api_key(client: TestClient, path: str) -> None:
+    resp = client.options(
+        path,
+        headers={
+            "Origin": "https://example.cloudfront.net",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "x-api-key",
+        },
+    )
+    assert resp.status_code == 204
+    assert resp.content == b""
+
+
 def test_simulate_inbound_creates_case_and_message(
     client: TestClient, deps: Deps, invoker: StubInvoker
 ) -> None:

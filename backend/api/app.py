@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hmac
 import uuid
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from typing import Annotated, Any
 
@@ -11,7 +12,7 @@ from dispatcher.core import ingest_inbound
 from dispatcher.inbound import NormalizedInbound
 from fastapi import APIRouter, Depends, FastAPI, Header, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from mangum import Mangum
 from resolveai_common.logging import configure_root_logger, get_logger
 from resolveai_common.models import (
@@ -117,7 +118,9 @@ def _scan_approvals(deps: Deps) -> list[Approval]:
 
 def _scan_messages(deps: Deps) -> list[Message]:
     return [
-        Message.model_validate({k: v for k, v in item.items() if k != MESSAGES_SORT_KEY})
+        Message.model_validate(
+            {k: v for k, v in item.items() if k != MESSAGES_SORT_KEY}
+        )
         for item in scan_all(deps.table("messages"))
     ]
 
@@ -324,6 +327,16 @@ def create_app(
 
     app.state.deps_provider = deps_provider
     app.state.trigger = trigger or build_default_trigger(deps_provider)
+
+    @app.middleware("http")
+    async def _cors_preflight(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        # API Gateway's $default route forwards OPTIONS here; it adds the CORS
+        # headers itself, so we only need a bodiless 2xx before auth/routing.
+        if request.method == "OPTIONS":
+            return Response(status_code=204)
+        return await call_next(request)
 
     @app.exception_handler(ApiError)
     async def _api_error(_: Request, exc: ApiError) -> JSONResponse:
