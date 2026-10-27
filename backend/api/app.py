@@ -24,6 +24,7 @@ from resolveai_common.models import (
     Message,
 )
 from resolveai_common.phone import normalize_phone
+from resolveai_common.repository import MESSAGES_SORT_KEY
 from services.config import ConfigError, get_param, now_iso
 from services.data import ApprovalAlreadyDecidedError, decide_approval, scan_all
 from services.demo_reset import DEMO_RESET_ENV, is_demo_reset_enabled, reset_demo
@@ -116,7 +117,7 @@ def _scan_approvals(deps: Deps) -> list[Approval]:
 
 def _scan_messages(deps: Deps) -> list[Message]:
     return [
-        Message.model_validate({k: v for k, v in item.items() if k != "sk"})
+        Message.model_validate({k: v for k, v in item.items() if k != MESSAGES_SORT_KEY})
         for item in scan_all(deps.table("messages"))
     ]
 
