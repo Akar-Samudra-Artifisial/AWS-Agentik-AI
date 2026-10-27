@@ -87,8 +87,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <aside className="border-b border-zinc-200/80 bg-white lg:w-60 lg:shrink-0 lg:border-r lg:border-b-0">
-        {/* aside meregang setinggi konten (latar + border penuh); isinya yang sticky. */}
-        <div className="lg:sticky lg:top-0 lg:flex lg:max-h-screen lg:min-h-screen lg:flex-col lg:overflow-y-auto">
+        {/* aside meregang setinggi konten (latar + border penuh); isinya sticky setinggi viewport.
+            Status & catatan ditumpuk di bawah nav (bukan mt-auto) agar tidak melayang di tengah
+            pada full-page screenshot, yang tetap memakai tinggi viewport untuk unit vh. */}
+        <div className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto">
           <div className="flex items-center justify-between gap-3 px-4 py-3.5 lg:px-5 lg:pt-5 lg:pb-6">
             <Link href="/" className="flex items-center gap-2.5 rounded-lg">
               <LogoMark />
@@ -133,7 +135,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </ul>
           </nav>
 
-          <div className="mt-auto hidden px-3 pb-4 lg:block">
+          <div className="mt-6 hidden border-t border-zinc-200/80 px-3 pt-5 pb-4 lg:block">
             <div className="rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-950/[0.05] ring-inset">
               <LiveIndicator />
               <p className="mt-1 text-[11px] text-zinc-500">Auto-refresh every {POLL_MS / 1000} s</p>

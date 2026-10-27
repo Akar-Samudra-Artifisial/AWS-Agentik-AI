@@ -29,12 +29,12 @@ function Updated({ iso }: { iso: string }) {
 
 export function CaseTable({ cases }: { cases: CaseSummary[] }) {
   const router = useRouter();
-  const th = "sticky top-0 z-10 bg-zinc-50/95 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500 backdrop-blur first:pl-5 last:pr-5 shadow-[inset_0_-1px_0_var(--color-zinc-200)]";
+  const th = "bg-zinc-50 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500 first:pl-5 last:pr-5 shadow-[inset_0_-1px_0_var(--color-zinc-200)]";
   const td = "px-4 py-3.5 first:pl-5 last:pr-5";
 
   return (
-    // Kontainer bergulir sendiri agar header tabel tetap terlihat (sticky) di daftar panjang.
-    <div className="max-h-[calc(100vh-18rem)] min-h-64 overflow-auto">
+    // Tabel memanjang mengikuti halaman (scroll halaman); hanya scroll horizontal di layar sempit.
+    <div className="overflow-x-auto">
       <table className="w-full min-w-[980px] text-left text-sm">
         <thead>
           <tr>
