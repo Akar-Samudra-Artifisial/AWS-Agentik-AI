@@ -10,7 +10,7 @@ Diperbarui oleh Claude Code setelah tiap milestone.
 | M3 Agent | sebagian | 11 tool + guard, Strands factory (`agent/agent_factory.py`), `run_turn` (`agent/runner.py`), entrypoint AgentCore (`agent/app.py`) + fallback Lambda (`agent/lambda_handler.py`), diuji offline dengan model palsu (`agent/.venv`: 69 passed). `scripts/eval_agent.py` + `agent/eval/golden.yaml` (14 percakapan, `--validate` OK). Belum: deploy AgentCore, panggilan Bedrock nyata, menjalankan eval. |
 | M4 Backend & orkestrasi | sebagian | API FastAPI+Mangum (`backend/api/`) + dispatcher (`backend/dispatcher/`) diuji offline (moto + TestClient), `POST /api/demo/reset` (P1, aktif via `DEMO_RESET_ENABLED`), `scripts/e2e.py` (`make e2e`, A/B-approve/B-reject/C). Belum: deploy & e2e nyata. |
 | M5 Dashboard | sebagian | 5 halaman static export, tipe dari OpenAPI (`npm run gen:types`), `npm run build` lulus. Belum: cek visual & sambung ke API nyata. |
-| M6 Hardening & submission | sebagian | `LICENSE` (MIT), `README.md` (Inggris), `docs/architecture.md` (Mermaid), git repo (remote GitLab). Belum: video, bukti pesan nyata, ACE Opportunity ID, persempit IAM. |
+| M6 Hardening & submission | sebagian | `LICENSE` (MIT), `README.md` (Inggris), `docs/architecture.md` (Mermaid), git repo (remote GitHub `Akar-Samudra-Artifisial/AWS-Agentik-AI`). Belum: video, bukti pesan nyata, ACE Opportunity ID, persempit IAM. |
 
 Verifikasi terakhir (2026-10-27): `.venv/bin/pytest -q tests` → 232 passed, 9 skipped (test Strands jalan di `agent/.venv`: 69 passed); ruff → bersih; `make synth` → 5 stack; dashboard `tsc --noEmit` → bersih.
 
