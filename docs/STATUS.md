@@ -54,4 +54,5 @@ Verifikasi terakhir (2026-10-27): `.venv/bin/pytest -q tests` → 233 passed, 10
 ## Bukti pesan nyata (untuk juri)
 (ID pesan WhatsApp/SMS/SES + lokasi screenshot)
 - 2026-10-27 · SES email · skenario A `CASE-20261027-CFD7` (ORD-1001, late_delivery → awaiting_customer), `delivery_status: sent` + `provider_message_id` SES. Screenshot inbox: belum (`docs/evidence/`).
-- 2026-10-27 · SES email · B-approve `CASE-20261027-CAAD` (resolved, execute_refund setelah approve, 3 email), B-reject `CASE-20261027-7089` (escalated, tanpa refund, 4 email), C `CASE-20261027-4FC8` (escalated high, 1 email) · `docs/evidence/scenario-*-case.json` (PII di-mask).
+- 2026-10-27 · SES email · B-approve `CASE-20261027-CAAD` (resolved, execute_refund setelah approve, 3 email), B-reject `CASE-20261027-7089` (escalated, tanpa refund, 4 email), C `CASE-20261027-4FC8` (escalated high, 1 email) · runtime v2, digantikan entri di bawah.
+- 2026-10-27 · SES email · rerun di runtime v3: A `CASE-20261027-F1CC` (resolved, redelivery), B-approve `CASE-20261027-68DB` (resolved, refund Rp349.000 simulasi setelah approve, 3 email), B-reject `CASE-20261027-5DAF` (escalated, tanpa execute_refund, 4 email), C `CASE-20261027-50CE` (escalated high) · `docs/evidence/scenario-*-case.json` (PII di-mask). Naskah video: `docs/demo-video-script.md`.
