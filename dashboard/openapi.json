@@ -1,0 +1,2241 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ResolveAI API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases": {
+      "get": {
+        "summary": "List Cases",
+        "operationId": "list_cases_api_cases_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CaseStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Channel"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Channel"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CaseSummary"
+                  },
+                  "title": "Response List Cases Api Cases Get"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/{case_id}": {
+      "get": {
+        "summary": "Get Case",
+        "operationId": "get_case_api_cases__case_id__get",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/approvals": {
+      "get": {
+        "summary": "List Approvals",
+        "operationId": "list_approvals_api_approvals_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ApprovalStatus",
+              "default": "pending"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovalWithCase"
+                  },
+                  "title": "Response List Approvals Api Approvals Get"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/approvals/{approval_id}/decision": {
+      "post": {
+        "summary": "Decide",
+        "operationId": "decide_api_approvals__approval_id__decision_post",
+        "parameters": [
+          {
+            "name": "approval_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Approval Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/simulate/inbound": {
+      "post": {
+        "summary": "Simulate Inbound",
+        "operationId": "simulate_inbound_api_simulate_inbound_post",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulateInboundRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulateInboundResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/metrics": {
+      "get": {
+        "summary": "Metrics",
+        "operationId": "metrics_api_metrics_get",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metrics"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/demo/reset": {
+      "post": {
+        "summary": "Demo Reset",
+        "operationId": "demo_reset_api_demo_reset_post",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoResetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgentEvent": {
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "ts": {
+            "type": "string",
+            "title": "Ts",
+            "description": "ISO 8601 UTC timestamp."
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Seq",
+            "description": "Monotonic sequence within the case."
+          },
+          "type": {
+            "$ref": "#/components/schemas/AgentEventType"
+          },
+          "tool": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool"
+          },
+          "input": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input"
+          },
+          "output": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output",
+            "description": "Truncated to <=4 KB."
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "ok": {
+            "type": "boolean",
+            "title": "Ok",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "case_id",
+          "ts",
+          "seq",
+          "type"
+        ],
+        "title": "AgentEvent",
+        "description": "An agent timeline event. PK ``case_id``, SK ``ts#seq``.\n\n``output`` is truncated to <=4 KB by the writer before persistence."
+      },
+      "AgentEventType": {
+        "type": "string",
+        "enum": [
+          "tool_call",
+          "tool_result",
+          "model_message",
+          "escalation",
+          "error"
+        ],
+        "title": "AgentEventType",
+        "description": "Type of event recorded in the agent timeline."
+      },
+      "Approval": {
+        "properties": {
+          "approval_id": {
+            "type": "string",
+            "title": "Approval Id",
+            "description": "Prefixed ID, e.g. 'APR-0001'."
+          },
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action",
+            "description": "Only 'refund' is supported.",
+            "default": "refund"
+          },
+          "amount_idr": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Amount Idr"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApprovalStatus",
+            "default": "pending"
+          },
+          "requested_at": {
+            "type": "string",
+            "title": "Requested At",
+            "description": "ISO 8601 UTC timestamp."
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "approval_id",
+          "case_id",
+          "order_id",
+          "amount_idr",
+          "reason",
+          "requested_at"
+        ],
+        "title": "Approval",
+        "description": "A staff approval request. PK ``approval_id``; GSI ``by_status``."
+      },
+      "ApprovalStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected"
+        ],
+        "title": "ApprovalStatus",
+        "description": "Status of a staff approval request."
+      },
+      "ApprovalWithCase": {
+        "properties": {
+          "approval_id": {
+            "type": "string",
+            "title": "Approval Id",
+            "description": "Prefixed ID, e.g. 'APR-0001'."
+          },
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action",
+            "description": "Only 'refund' is supported.",
+            "default": "refund"
+          },
+          "amount_idr": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Amount Idr"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApprovalStatus",
+            "default": "pending"
+          },
+          "requested_at": {
+            "type": "string",
+            "title": "Requested At",
+            "description": "ISO 8601 UTC timestamp."
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "case": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CaseSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "approval_id",
+          "case_id",
+          "order_id",
+          "amount_idr",
+          "reason",
+          "requested_at"
+        ],
+        "title": "ApprovalWithCase"
+      },
+      "Case": {
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "title": "Case Id",
+            "description": "Prefixed ID, e.g. 'CASE-20261028-0001'."
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/Channel",
+            "description": "Channel of the first inbound message."
+          },
+          "status": {
+            "$ref": "#/components/schemas/CaseStatus",
+            "default": "open"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CaseCategory",
+            "default": "other"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/CasePriority",
+            "default": "normal"
+          },
+          "resolution_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResolutionType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CaseResolution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "default": ""
+          },
+          "first_inbound_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Inbound At"
+          },
+          "first_response_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Response At"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "description": "ISO 8601 UTC timestamp."
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At",
+            "description": "ISO 8601 UTC timestamp."
+          },
+          "lock_until": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lock Until",
+            "description": "ISO 8601 UTC lock expiry."
+          },
+          "seeded": {
+            "type": "boolean",
+            "title": "Seeded",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "case_id",
+          "customer_id",
+          "channel",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Case",
+        "description": "A support case. PK ``case_id``; GSIs ``by_customer`` and ``by_status``."
+      },
+      "CaseCategory": {
+        "type": "string",
+        "enum": [
+          "late_delivery",
+          "lost_package",
+          "not_received",
+          "status_inquiry",
+          "address_change",
+          "other"
+        ],
+        "title": "CaseCategory",
+        "description": "Classification of the customer complaint."
+      },
+      "CaseDetail": {
+        "properties": {
+          "case": {
+            "$ref": "#/components/schemas/Case"
+          },
+          "customer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Customer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "order": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Order"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/AgentEvent"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "approvals": {
+            "items": {
+              "$ref": "#/components/schemas/Approval"
+            },
+            "type": "array",
+            "title": "Approvals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "case",
+          "messages",
+          "events",
+          "approvals"
+        ],
+        "title": "CaseDetail"
+      },
+      "CasePriority": {
+        "type": "string",
+        "enum": [
+          "normal",
+          "high"
+        ],
+        "title": "CasePriority",
+        "description": "Case handling priority."
+      },
+      "CaseResolution": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "amount_idr": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Idr"
+          },
+          "voucher_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voucher Code"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action",
+          "summary"
+        ],
+        "title": "CaseResolution",
+        "description": "Resolution summary attached to a case once it is closed."
+      },
+      "CaseStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "investigating",
+          "awaiting_customer",
+          "awaiting_approval",
+          "escalated",
+          "resolved",
+          "error"
+        ],
+        "title": "CaseStatus",
+        "description": "Lifecycle status of a support case."
+      },
+      "CaseSummary": {
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CaseStatus"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CaseCategory"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/CasePriority"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/Channel"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "default": ""
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "resolution_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResolutionType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "case_id",
+          "status",
+          "category",
+          "priority",
+          "channel",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CaseSummary"
+      },
+      "Channel": {
+        "type": "string",
+        "enum": [
+          "whatsapp",
+          "sms",
+          "email"
+        ],
+        "title": "Channel",
+        "description": "Messaging channel a message was sent or received on."
+      },
+      "Customer": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id",
+            "description": "Prefixed ID, e.g. 'CUST-0001'."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "phone_e164": {
+            "type": "string",
+            "title": "Phone E164",
+            "description": "E.164 phone, e.g. '+62812...'."
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "id"
+          },
+          "preferred_channel": {
+            "$ref": "#/components/schemas/PreferredChannel",
+            "default": "whatsapp"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "description": "ISO 8601 UTC timestamp."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "customer_id",
+          "name",
+          "phone_e164",
+          "created_at"
+        ],
+        "title": "Customer",
+        "description": "A customer record. PK ``customer_id``; GSI ``by_phone`` on ``phone_e164``."
+      },
+      "DecisionRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "reject"
+            ],
+            "title": "Decision"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "decided_by": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Decided By"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "decision",
+          "decided_by"
+        ],
+        "title": "DecisionRequest"
+      },
+      "DecisionResponse": {
+        "properties": {
+          "approval_id": {
+            "type": "string",
+            "title": "Approval Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "approval_id",
+          "status"
+        ],
+        "title": "DecisionResponse"
+      },
+      "DeliveryStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "sent",
+          "delivered",
+          "read",
+          "failed"
+        ],
+        "title": "DeliveryStatus",
+        "description": "Delivery state of an outbound message."
+      },
+      "DemoResetDeleted": {
+        "properties": {
+          "cases": {
+            "type": "integer",
+            "title": "Cases",
+            "default": 0
+          },
+          "messages": {
+            "type": "integer",
+            "title": "Messages",
+            "default": 0
+          },
+          "agent_events": {
+            "type": "integer",
+            "title": "Agent Events",
+            "default": 0
+          },
+          "approvals": {
+            "type": "integer",
+            "title": "Approvals",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "DemoResetDeleted"
+      },
+      "DemoResetResponse": {
+        "properties": {
+          "deleted": {
+            "$ref": "#/components/schemas/DemoResetDeleted"
+          },
+          "reset_orders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reset Orders"
+          }
+        },
+        "type": "object",
+        "required": [
+          "deleted",
+          "reset_orders"
+        ],
+        "title": "DemoResetResponse"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorBody"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse"
+      },
+      "FirstResponseMs": {
+        "properties": {
+          "p50": {
+            "type": "integer",
+            "title": "P50",
+            "default": 0
+          },
+          "p90": {
+            "type": "integer",
+            "title": "P90",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "FirstResponseMs"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status",
+            "default": "ok"
+          }
+        },
+        "type": "object",
+        "title": "HealthResponse"
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "id",
+          "en"
+        ],
+        "title": "Language",
+        "description": "Customer language preference."
+      },
+      "Message": {
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "msg_id": {
+            "type": "string",
+            "title": "Msg Id"
+          },
+          "ts": {
+            "type": "string",
+            "title": "Ts",
+            "description": "ISO 8601 UTC timestamp."
+          },
+          "direction": {
+            "$ref": "#/components/schemas/MessageDirection"
+          },
+          "author": {
+            "$ref": "#/components/schemas/MessageAuthor"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/Channel"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "provider_message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Message Id"
+          },
+          "delivery_status": {
+            "$ref": "#/components/schemas/DeliveryStatus",
+            "default": "queued"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "simulated": {
+            "type": "boolean",
+            "title": "Simulated",
+            "default": false
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "description": "ISO 8601 UTC timestamp."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "case_id",
+          "msg_id",
+          "ts",
+          "direction",
+          "author",
+          "channel",
+          "body",
+          "created_at"
+        ],
+        "title": "Message",
+        "description": "A conversation message. PK ``case_id``, SK ``ts#msg_id``."
+      },
+      "MessageAuthor": {
+        "type": "string",
+        "enum": [
+          "customer",
+          "agent",
+          "staff",
+          "system"
+        ],
+        "title": "MessageAuthor",
+        "description": "Who authored a message."
+      },
+      "MessageDirection": {
+        "type": "string",
+        "enum": [
+          "inbound",
+          "outbound"
+        ],
+        "title": "MessageDirection",
+        "description": "Direction of a message relative to the system."
+      },
+      "Metrics": {
+        "properties": {
+          "totals": {
+            "$ref": "#/components/schemas/Totals"
+          },
+          "auto_resolution_rate": {
+            "type": "number",
+            "title": "Auto Resolution Rate"
+          },
+          "first_response_ms": {
+            "$ref": "#/components/schemas/FirstResponseMs"
+          },
+          "resolution_ms": {
+            "$ref": "#/components/schemas/ResolutionMs"
+          },
+          "by_channel": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Channel"
+          },
+          "by_category": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Category"
+          },
+          "messages_sent": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Messages Sent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "totals",
+          "auto_resolution_rate",
+          "first_response_ms",
+          "resolution_ms",
+          "by_channel",
+          "by_category",
+          "messages_sent"
+        ],
+        "title": "Metrics"
+      },
+      "Order": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id",
+            "description": "Prefixed ID, e.g. 'ORD-1001'."
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total_idr": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Idr",
+            "description": "Order total in integer rupiah."
+          },
+          "courier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Courier"
+          },
+          "tracking_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracking Number"
+          },
+          "shipped_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipped At"
+          },
+          "eta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eta",
+            "description": "Estimated delivery, ISO 8601 UTC."
+          },
+          "last_scan_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Scan At"
+          },
+          "last_scan_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Scan Location"
+          },
+          "tracking_events": {
+            "items": {
+              "$ref": "#/components/schemas/TrackingEvent"
+            },
+            "type": "array",
+            "title": "Tracking Events"
+          },
+          "redelivery_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Redelivery At"
+          },
+          "refund": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefundInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "description": "ISO 8601 UTC timestamp."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "order_id",
+          "customer_id",
+          "status",
+          "total_idr",
+          "created_at"
+        ],
+        "title": "Order",
+        "description": "An order. PK ``order_id``; GSI ``by_customer`` (``customer_id``, ``created_at``).\n\nDerived fields (``days_late``, ``days_since_last_scan``, ``eligibility``) are NOT\nstored here; they are computed by the agent at read time."
+      },
+      "OrderItem": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "qty": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Qty"
+          },
+          "price_idr": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Price Idr",
+            "description": "Unit price in integer rupiah."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "qty",
+          "price_idr"
+        ],
+        "title": "OrderItem",
+        "description": "A single line item within an order."
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "processing",
+          "shipped",
+          "in_transit",
+          "out_for_delivery",
+          "delivered",
+          "cancelled",
+          "refunded"
+        ],
+        "title": "OrderStatus",
+        "description": "Lifecycle status of an order."
+      },
+      "PreferredChannel": {
+        "type": "string",
+        "enum": [
+          "whatsapp",
+          "sms",
+          "email"
+        ],
+        "title": "PreferredChannel",
+        "description": "Customer's preferred outbound channel."
+      },
+      "RefundInfo": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ApprovalStatus"
+          },
+          "amount_idr": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Amount Idr"
+          },
+          "at": {
+            "type": "string",
+            "title": "At",
+            "description": "ISO 8601 UTC timestamp of the refund decision."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "amount_idr",
+          "at"
+        ],
+        "title": "RefundInfo",
+        "description": "Refund sub-record attached to an order once a refund is initiated."
+      },
+      "ResolutionMs": {
+        "properties": {
+          "p50": {
+            "type": "integer",
+            "title": "P50",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "ResolutionMs"
+      },
+      "ResolutionType": {
+        "type": "string",
+        "enum": [
+          "auto_resolved",
+          "approved_by_staff",
+          "rejected_by_staff",
+          "escalated"
+        ],
+        "title": "ResolutionType",
+        "description": "How a case was ultimately resolved."
+      },
+      "SimulateInboundRequest": {
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/Channel"
+          },
+          "from_e164": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "From E164"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "channel",
+          "from_e164",
+          "text"
+        ],
+        "title": "SimulateInboundRequest"
+      },
+      "SimulateInboundResponse": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "case_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id"
+        ],
+        "title": "SimulateInboundResponse"
+      },
+      "Totals": {
+        "properties": {
+          "cases": {
+            "type": "integer",
+            "title": "Cases",
+            "default": 0
+          },
+          "active": {
+            "type": "integer",
+            "title": "Active",
+            "default": 0
+          },
+          "resolved": {
+            "type": "integer",
+            "title": "Resolved",
+            "default": 0
+          },
+          "escalated": {
+            "type": "integer",
+            "title": "Escalated",
+            "default": 0
+          },
+          "pending_approvals": {
+            "type": "integer",
+            "title": "Pending Approvals",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "Totals"
+      },
+      "TrackingEvent": {
+        "properties": {
+          "ts": {
+            "type": "string",
+            "title": "Ts",
+            "description": "ISO 8601 UTC timestamp of the scan."
+          },
+          "location": {
+            "type": "string",
+            "title": "Location"
+          },
+          "desc": {
+            "type": "string",
+            "title": "Desc"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "ts",
+          "location",
+          "desc"
+        ],
+        "title": "TrackingEvent",
+        "description": "A courier tracking scan event."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

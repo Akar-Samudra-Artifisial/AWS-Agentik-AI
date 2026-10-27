@@ -1,0 +1,13 @@
+{
+  "app": ".venv/bin/python app.py",
+  "watch": {
+    "include": ["**"],
+    "exclude": ["cdk.out", ".venv", "**/__pycache__"]
+  },
+  "context": {
+    "env_name": "dev",
+    "lambda_bundle_path": "../build/lambda",
+    "@aws-cdk/core:defaultCrossStackReferences": "strong",
+    "dev_cors_origin": "http://localhost:3000"
+  }
+}
