@@ -180,6 +180,7 @@ def test_cases_list_filters_and_case_404(client: TestClient, deps: Deps) -> None
         status="resolved",
         channel="email",
         updated_at="2026-10-27T02:00:00Z",
+        resolution={"action": "refund", "summary": "Refund Rp349.000 disetujui"},
     )
 
     all_cases = client.get("/api/cases", headers=HEADERS).json()
@@ -188,6 +189,8 @@ def test_cases_list_filters_and_case_404(client: TestClient, deps: Deps) -> None
         "CASE-20261027-0001",
     ]
     assert all_cases[0]["customer_name"] == "Rani"
+    assert all_cases[0]["resolution_summary"] == "Refund Rp349.000 disetujui"
+    assert all_cases[1]["resolution_summary"] is None
 
     by_status = client.get("/api/cases?status=open", headers=HEADERS).json()
     assert [c["case_id"] for c in by_status] == ["CASE-20261027-0001"]
