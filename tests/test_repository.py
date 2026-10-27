@@ -6,12 +6,14 @@ Covers put/get/query per table and GSI, Decimal <-> int conversion, inbound dedu
 
 from __future__ import annotations
 
+import re
 from collections.abc import Iterator
 from decimal import Decimal
+from pathlib import Path
 
 import boto3
 import pytest
-from _dynamo_schema import create_tables
+from _dynamo_schema import TABLES, create_tables
 from moto import mock_aws
 from resolveai_common.models import (
     AgentEvent,
@@ -31,6 +33,8 @@ from resolveai_common.models import (
     ProcessedEvent,
 )
 from resolveai_common.repository import (
+    AGENT_EVENTS_SORT_KEY,
+    MESSAGES_SORT_KEY,
     CaseLockedError,
     CaseNotFoundError,
     DuplicateEventError,
@@ -289,3 +293,19 @@ def test_case_lock_on_missing_case_does_not_create_item(repos: Repositories) -> 
         repos.cases.acquire_lock("CASE-404", lock_until="2026-10-28T03:02:30Z", now=NOW)
 
     assert repos.cases.get("CASE-404") is None
+
+
+def test_sort_key_names_match_deployed_infra() -> None:
+    """Regression: repository + moto schema must use the SK names deployed by CDK."""
+    data_stack = (
+        Path(__file__).resolve().parents[1] / "infra" / "stacks" / "data_stack.py"
+    ).read_text()
+    infra_sort_keys = dict(
+        re.findall(r'self\._table\(prefix, "(\w+)", "\w+", sort_key="([^"]+)"\)', data_stack)
+    )
+    assert infra_sort_keys == {
+        "messages": MESSAGES_SORT_KEY,
+        "agent_events": AGENT_EVENTS_SORT_KEY,
+    }
+    assert TABLES["messages"][1] == MESSAGES_SORT_KEY
+    assert TABLES["agent_events"][1] == AGENT_EVENTS_SORT_KEY
