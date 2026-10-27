@@ -2,16 +2,31 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { AgentEvent, AgentEventType } from "@/lib/api-types";
-import { formatDuration, formatTime } from "@/lib/format";
+import { formatDateTime, formatDuration, formatTime } from "@/lib/format";
 import { maskText } from "@/lib/mask";
 import { EmptyState, SimulatedTag, cx } from "./ui";
 
 const TYPE_LABEL: Record<AgentEventType, string> = {
   tool_call: "Tool call",
-  tool_result: "Hasil tool",
-  model_message: "Pesan model",
-  escalation: "Eskalasi",
+  tool_result: "Tool result",
+  model_message: "Model message",
+  escalation: "Escalation",
   error: "Error",
+};
+
+/** Deskripsi singkat tool agen agar langkah terbaca tanpa membuka JSON. */
+const TOOL_DESCRIPTION: Record<string, string> = {
+  get_order: "Look up order & tracking",
+  find_orders_by_customer: "Find the customer’s orders",
+  search_policy: "Search company policy (RAG)",
+  update_case: "Update case category / status",
+  send_message: "Reply to the customer",
+  send_resolution_notice: "Send resolution notice",
+  create_voucher: "Issue a goodwill voucher",
+  schedule_redelivery: "Schedule a redelivery",
+  request_refund: "Request a refund",
+  execute_refund: "Execute an approved refund",
+  escalate_to_human: "Escalate to a human agent",
 };
 
 const SIMULATED_TOOLS = new Set(["execute_refund", "request_refund", "schedule_redelivery"]);
@@ -96,11 +111,11 @@ export function AgentTimeline({ events }: { events: AgentEvent[] }) {
   }, [keys]);
 
   if (sorted.length === 0) {
-    return <EmptyState title="Agen belum mengambil langkah" hint="Setiap tool call agen akan tercatat di sini." />;
+    return <EmptyState title="No agent steps yet" hint="Every tool the agent calls will be logged here." />;
   }
 
   return (
-    <ol className="relative space-y-1 px-5 py-4" aria-label="Linimasa agen">
+    <ol className="relative space-y-1 px-5 py-4" aria-label="Agent timeline">
       {sorted.map((e, i) => {
         const key = eventKey(e, i);
         const failed = e.ok === false || e.type === "error";
@@ -119,44 +134,49 @@ export function AgentTimeline({ events }: { events: AgentEvent[] }) {
               <span aria-hidden="true" className="absolute top-6 bottom-[-6px] left-[10px] w-px bg-stone-200" />
             ) : null}
             <details className="group rounded-lg px-2 py-2 hover:bg-stone-50">
-              <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-2 gap-y-1 rounded">
-                <span className="font-mono text-sm font-semibold text-stone-900">
-                  {e.tool ?? TYPE_LABEL[e.type] ?? e.type}
-                </span>
-                <span className="text-xs text-stone-500">{TYPE_LABEL[e.type] ?? e.type}</span>
-                <span
-                  className={cx(
-                    "rounded px-1.5 text-[11px] font-medium",
-                    failed ? "bg-red-100 text-red-800" : "bg-emerald-50 text-emerald-800",
-                  )}
-                >
-                  {failed ? "✕ gagal" : "✓ ok"}
-                </span>
-                {e.tool && SIMULATED_TOOLS.has(e.tool) ? <SimulatedTag /> : null}
-                <span className="ml-auto flex items-center gap-2 text-xs tabular-nums text-stone-500">
-                  {e.latency_ms != null ? <span>{formatDuration(e.latency_ms)}</span> : null}
-                  <time dateTime={e.ts}>{formatTime(e.ts)}</time>
-                  <span aria-hidden="true" className="transition-transform group-open:rotate-90">
-                    ›
+              {/* Ringkasan + sumber kebijakan selalu terlihat; JSON lengkap muncul saat dibuka. */}
+              <summary className="block cursor-pointer list-none rounded">
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="font-mono text-sm font-semibold text-stone-900">{e.tool ?? TYPE_LABEL[e.type] ?? e.type}</span>
+                  {/* Hanya hasil tool/error yang punya status; tool_call tanpa hasil ditampilkan netral. */}
+                  {failed ? (
+                    <span className="rounded bg-red-100 px-1.5 py-px text-[11px] font-semibold text-red-800">✕ Failed</span>
+                  ) : e.type === "tool_result" ? (
+                    <span className="rounded bg-emerald-50 px-1.5 py-px text-[11px] font-semibold text-emerald-800">✓ OK</span>
+                  ) : e.type === "tool_call" ? (
+                    <span className="rounded bg-stone-100 px-1.5 py-px text-[11px] font-semibold text-stone-600">→ Called</span>
+                  ) : null}
+                  {e.tool && SIMULATED_TOOLS.has(e.tool) ? <SimulatedTag /> : null}
+                  <span className="ml-auto flex items-center gap-2 text-xs tabular-nums text-stone-500">
+                    {e.latency_ms != null ? <span title="Latency">{formatDuration(e.latency_ms)}</span> : null}
+                    <time dateTime={e.ts} title={formatDateTime(e.ts)}>{formatTime(e.ts)}</time>
+                    <span aria-hidden="true" className="inline-block transition-transform group-open:rotate-90">
+                      ›
+                    </span>
                   </span>
                 </span>
+                <span className="mt-0.5 block text-xs font-medium text-stone-500">
+                  {TYPE_LABEL[e.type] ?? e.type}
+                  {e.tool && TOOL_DESCRIPTION[e.tool] ? ` · ${TOOL_DESCRIPTION[e.tool]}` : ""}
+                </span>
+                {/* Hasil tool sukses biasanya "ok=true, …" (noise); isinya tetap ada di JSON saat dibuka. */}
+                {(e.type !== "tool_result" || failed) && summarize(detail) ? (
+                  <span className="mt-1 block text-[13px] leading-snug text-stone-600">{summarize(detail)}</span>
+                ) : null}
+                {sources.length ? (
+                  <span className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className="font-medium text-stone-600">Policy sources:</span>
+                    {sources.map((s) => (
+                      <span key={s} className="rounded bg-brand-50 px-1.5 py-0.5 font-mono text-brand-700 ring-1 ring-brand-100">
+                        {s}
+                      </span>
+                    ))}
+                  </span>
+                ) : null}
               </summary>
-              {summarize(detail) ? (
-                <p className="mt-1 text-[13px] leading-snug text-stone-600">{summarize(detail)}</p>
-              ) : null}
-              {sources.length ? (
-                <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
-                  <span className="font-medium text-stone-600">Sumber kebijakan:</span>
-                  {sources.map((s) => (
-                    <span key={s} className="rounded bg-brand-50 px-1.5 py-0.5 font-mono text-brand-700 ring-1 ring-brand-100">
-                      {s}
-                    </span>
-                  ))}
-                </p>
-              ) : null}
               <div className="mt-2 grid gap-2 lg:grid-cols-2">
-                {e.input != null ? <JsonBlock title="input" value={e.input} /> : null}
-                {e.output != null ? <JsonBlock title="output" value={e.output} /> : null}
+                {e.input != null ? <JsonBlock title="Input" value={e.input} /> : null}
+                {e.output != null ? <JsonBlock title="Output" value={e.output} /> : null}
               </div>
             </details>
           </li>

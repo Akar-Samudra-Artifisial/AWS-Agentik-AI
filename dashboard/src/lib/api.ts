@@ -38,7 +38,7 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!isApiConfigured) {
-    throw new ApiError(0, "not_configured", "NEXT_PUBLIC_API_BASE_URL belum diatur saat build.");
+    throw new ApiError(0, "not_configured", "NEXT_PUBLIC_API_BASE_URL was not set at build time.");
   }
   let res: Response;
   try {
@@ -51,7 +51,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       },
     });
   } catch {
-    throw new ApiError(0, "network", "Tidak dapat terhubung ke API.");
+    throw new ApiError(0, "network", "Cannot reach the API. Check your connection.");
   }
   const text = await res.text();
   const body: unknown = text ? safeJson(text) : null;
@@ -141,14 +141,14 @@ export function fetchCases(limit = 20) {
 
 export function errorMessage(err: unknown): string {
   if (err instanceof ApiError) {
-    if (err.status === 401 || err.status === 403) return "API key ditolak (401/403). Periksa NEXT_PUBLIC_API_KEY.";
-    if (err.status === 404) return "Data tidak ditemukan (404).";
+    if (err.status === 401 || err.status === 403) return "API key rejected (401/403). Check NEXT_PUBLIC_API_KEY.";
+    if (err.status === 404) return "Not found (404).";
     if (err.status === 0) return err.message;
     return `${err.message} (HTTP ${err.status})`;
   }
-  return err instanceof Error ? err.message : "Terjadi kesalahan tak terduga.";
+  return err instanceof Error ? err.message : "An unexpected error occurred.";
 }
 
 export const STAFF_NAME = process.env.NEXT_PUBLIC_STAFF_NAME || "Supervisor";
 export const DEMO_PHONE_E164 = process.env.NEXT_PUBLIC_DEMO_PHONE_E164 ?? "";
-export const DEMO_CUSTOMER_NAME = process.env.NEXT_PUBLIC_DEMO_CUSTOMER_NAME || "Pelanggan demo";
+export const DEMO_CUSTOMER_NAME = process.env.NEXT_PUBLIC_DEMO_CUSTOMER_NAME || "Demo customer";

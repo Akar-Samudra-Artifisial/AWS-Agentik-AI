@@ -45,14 +45,14 @@ export function ApprovalCard({
       });
       setResult({
         kind: "ok",
-        text: `Keputusan diterima (202) — status ${res?.status ?? (pending === "approve" ? "approved" : "rejected")}. Agen sedang melanjutkan kasus.`,
+        text: `Decision recorded (202) — status: ${res?.status ?? (pending === "approve" ? "approved" : "rejected")}. The agent is resuming the case.`,
       });
       setPending(null);
       setNote("");
       onDecided?.();
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
-        setResult({ kind: "conflict", text: "Approval ini sudah diputuskan sebelumnya (409). Data diperbarui." });
+        setResult({ kind: "conflict", text: "This approval was already decided (409). Data refreshed." });
         setPending(null);
         onDecided?.();
       } else {
@@ -71,46 +71,63 @@ export function ApprovalCard({
       )}
       aria-label={`Approval ${approval.approval_id}`}
     >
-      <div className={cx("flex items-start justify-between gap-3", compact ? "px-4 pt-3" : "px-5 pt-4")}>
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
-            Refund · <span className="font-mono normal-case">{approval.approval_id}</span>
+      <div className={cx(compact ? "px-4 pt-3" : "px-5 pt-4")}>
+        <div className="flex items-center justify-between gap-3">
+          <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-stone-500">
+            Refund request · <span className="font-mono normal-case">{approval.approval_id}</span>
           </p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-stone-900">{formatIdr(approval.amount_idr)}</p>
-          <p className="mt-0.5 text-sm text-stone-600">
-            <Link href={`/case/?id=${encodeURIComponent(approval.case_id)}`} className="font-mono text-brand-700 underline-offset-2 hover:underline">
-              {approval.case_id}
-            </Link>
-            {approval.order_id ? <span className="font-mono"> · {approval.order_id}</span> : null}
-            {customer ? <span> · {customer}</span> : null}
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
           <ApprovalStatusBadge status={approval.status} />
-          <SimulatedTag label="Pembayaran disimulasikan" />
         </div>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <p className={cx("font-semibold tabular-nums text-stone-900", compact ? "text-xl" : "text-2xl")}>
+            {formatIdr(approval.amount_idr)}
+          </p>
+          <SimulatedTag label="Simulated payment" />
+        </div>
+        <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-sm text-stone-600">
+          <Link
+            href={`/case/?id=${encodeURIComponent(approval.case_id)}`}
+            className="font-mono whitespace-nowrap text-brand-700 underline-offset-2 hover:underline"
+          >
+            {approval.case_id}
+          </Link>
+          {approval.order_id ? (
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="font-mono whitespace-nowrap">{approval.order_id}</span>
+            </>
+          ) : null}
+          {customer ? (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{customer}</span>
+            </>
+          ) : null}
+        </p>
       </div>
 
-      <div className={cx("space-y-2 text-sm", compact ? "px-4 py-2" : "px-5 py-3")}>
+      <div className={cx("space-y-2 text-sm", compact ? "px-4 py-2.5" : "px-5 py-3")}>
         {approval.reason ? (
           <p>
-            <span className="font-medium text-stone-700">Alasan: </span>
+            <span className="font-medium text-stone-700">Reason: </span>
             <span className="text-stone-800">{maskText(approval.reason)}</span>
           </p>
         ) : null}
         {summary && !compact ? (
           <p className="text-stone-600">
-            <span className="font-medium text-stone-700">Ringkasan: </span>
+            <span className="font-medium text-stone-700">Case summary: </span>
             {maskText(summary)}
           </p>
         ) : null}
         <p className="text-xs text-stone-500">
-          Diminta {formatRelative(approval.requested_at)} ({formatDateTime(approval.requested_at)})
-          {approval.decided_at
-            ? ` · Diputuskan ${formatRelative(approval.decided_at)}${approval.decided_by ? ` oleh ${approval.decided_by}` : ""}`
-            : ""}
+          <span title={formatDateTime(approval.requested_at)}>Requested {formatRelative(approval.requested_at)}</span>
+          {approval.decided_at ? (
+            <span title={formatDateTime(approval.decided_at)}>
+              {` · Decided ${formatRelative(approval.decided_at)}${approval.decided_by ? ` by ${approval.decided_by}` : ""}`}
+            </span>
+          ) : null}
         </p>
-        {approval.note ? <p className="text-xs text-stone-600">Catatan: {approval.note}</p> : null}
+        {approval.note ? <p className="text-xs text-stone-600">Note: {maskText(approval.note)}</p> : null}
       </div>
 
       {isPending ? (
@@ -118,7 +135,7 @@ export function ApprovalCard({
           {pending ? (
             <div className="space-y-2.5">
               <label htmlFor={noteId} className="block text-sm font-medium text-stone-700">
-                Catatan (opsional)
+                Note (optional)
               </label>
               <textarea
                 id={noteId}
@@ -126,12 +143,12 @@ export function ApprovalCard({
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-600"
-                placeholder="Mis. sudah dicek dengan kurir"
+                placeholder="e.g. Verified with the courier"
               />
               <p className="text-sm text-stone-700">
                 {pending === "approve"
-                  ? `Setujui refund ${formatIdr(approval.amount_idr)}? Agen akan mengeksekusi refund (simulasi) dan mengabari pelanggan.`
-                  : "Tolak refund? Agen akan meminta maaf dan mengeskalasi ke staf."}
+                  ? `Approve a ${formatIdr(approval.amount_idr)} refund? The agent will execute the (simulated) refund and notify the customer.`
+                  : "Reject this refund? The agent will apologise to the customer and escalate to staff."}
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -139,19 +156,19 @@ export function ApprovalCard({
                   loading={submitting}
                   onClick={submit}
                 >
-                  {pending === "approve" ? "Ya, approve" : "Ya, reject"}
+                  {pending === "approve" ? "Yes, approve" : "Yes, reject"}
                 </Button>
                 <Button variant="ghost" disabled={submitting} onClick={() => setPending(null)}>
-                  Batal
+                  Cancel
                 </Button>
               </div>
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              <Button variant="primary" onClick={() => setPending("approve")} aria-label={`Approve ${approval.approval_id}`}>
+              <Button variant="primary" onClick={() => setPending("approve")} aria-label={`Approve refund ${approval.approval_id}`}>
                 ✓ Approve
               </Button>
-              <Button variant="danger" onClick={() => setPending("reject")} aria-label={`Reject ${approval.approval_id}`}>
+              <Button variant="danger" onClick={() => setPending("reject")} aria-label={`Reject refund ${approval.approval_id}`}>
                 ✕ Reject
               </Button>
             </div>

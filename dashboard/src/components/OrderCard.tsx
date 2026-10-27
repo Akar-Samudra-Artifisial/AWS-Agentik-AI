@@ -33,8 +33,8 @@ export function OrderCard({ order }: { order: Order | null | undefined }) {
   if (!order) {
     return (
       <Card>
-        <CardHeader title="Pesanan" />
-        <p className="px-5 py-4 text-sm text-stone-500">Kasus belum terhubung ke pesanan.</p>
+        <CardHeader title="Order" />
+        <p className="px-5 py-4 text-sm text-stone-500">This case isn’t linked to an order yet.</p>
       </Card>
     );
   }
@@ -46,37 +46,39 @@ export function OrderCard({ order }: { order: Order | null | undefined }) {
   const sinceScan = daysSince(order.last_scan_at);
   return (
     <Card>
-      <CardHeader title="Pesanan" action={<SimulatedTag label="kurir simulated" />} />
+      <CardHeader title="Order" action={<SimulatedTag label="Simulated courier" />} />
       <dl className="divide-y divide-stone-100 px-5 py-2">
         <Field label="ID" value={<span className="font-mono">{order.order_id}</span>} />
         <Field label="Status" value={labelOf(ORDER_STATUS_LABEL, order.status)} />
-        <Field label="Nilai" value={formatIdr(order.total_idr)} />
+        <Field label="Order value" value={formatIdr(order.total_idr)} />
         <Field label="ETA" value={formatDateTime(order.eta)} />
         <Field
-          label="Keterlambatan"
+          label="Delay"
           value={
             late == null ? (
               <span className="text-stone-500">—</span>
             ) : late > 0 ? (
               <span className="rounded bg-red-50 px-1.5 text-red-800">
-                {late} hari{order.status === "refunded" ? " (saat refund)" : ""}
+                {late} {late === 1 ? "day" : "days"} late{order.status === "refunded" ? " (at refund)" : ""}
               </span>
             ) : (
-              <span className="text-stone-600">Tepat waktu</span>
+              <span className="text-stone-600">On time</span>
             )
           }
         />
-        {sinceScan != null ? <Field label="Scan terakhir" value={`${sinceScan} hari lalu`} /> : null}
-        {order.last_scan_location ? <Field label="Lokasi terakhir" value={order.last_scan_location} /> : null}
-        {order.courier ? <Field label="Kurir" value={order.courier} /> : null}
-        {order.redelivery_at ? <Field label="Kirim ulang" value={formatDateTime(order.redelivery_at)} /> : null}
+        {sinceScan != null ? <Field label="Last scan" value={sinceScan === 0 ? "Today" : `${sinceScan} ${sinceScan === 1 ? "day" : "days"} ago`} /> : null}
+        {order.last_scan_location ? <Field label="Last location" value={order.last_scan_location} /> : null}
+        {order.courier ? <Field label="Courier" value={order.courier} /> : null}
+        {order.redelivery_at ? <Field label="Redelivery" value={formatDateTime(order.redelivery_at)} /> : null}
         {order.refund ? (
           <Field
             label="Refund"
             value={
-              <span className="inline-flex items-center gap-1.5">
-                {formatIdr(order.refund.amount_idr)} · {order.refund.status}
-                <SimulatedTag />
+              <span className="inline-flex flex-col items-end gap-1">
+                <span className="whitespace-nowrap">
+                  {formatIdr(order.refund.amount_idr)} · <span className="capitalize">{order.refund.status}</span>
+                </span>
+                <SimulatedTag label="Simulated payment" />
               </span>
             }
           />
@@ -89,19 +91,19 @@ export function OrderCard({ order }: { order: Order | null | undefined }) {
 export function CustomerCard({ customer }: { customer: Customer | null | undefined }) {
   return (
     <Card>
-      <CardHeader title="Pelanggan" />
+      <CardHeader title="Customer" />
       {customer ? (
         <dl className="divide-y divide-stone-100 px-5 py-2">
-          <Field label="Nama" value={customer.name} />
+          <Field label="Name" value={customer.name} />
           <Field label="ID" value={<span className="font-mono">{customer.customer_id}</span>} />
-          <Field label="Telepon" value={<span className="font-mono">{maskPhone(customer.phone_e164)}</span>} />
+          <Field label="Phone" value={<span className="font-mono">{maskPhone(customer.phone_e164)}</span>} />
           <Field label="Email" value={<span className="font-mono">{maskEmail(customer.email)}</span>} />
           {customer.preferred_channel ? (
-            <Field label="Kanal favorit" value={CHANNEL_LABEL[customer.preferred_channel]} />
+            <Field label="Preferred channel" value={CHANNEL_LABEL[customer.preferred_channel]} />
           ) : null}
         </dl>
       ) : (
-        <p className="px-5 py-4 text-sm text-stone-500">Data pelanggan tidak tersedia.</p>
+        <p className="px-5 py-4 text-sm text-stone-500">Customer details unavailable.</p>
       )}
     </Card>
   );

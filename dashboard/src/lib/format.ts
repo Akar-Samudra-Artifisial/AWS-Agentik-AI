@@ -1,24 +1,49 @@
 import type { CaseCategory, CaseStatus, Channel, OrderStatus, ResolutionType } from "./api-types";
 
-const idr = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
-const dateTime = new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" });
-const timeOnly = new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-const rtf = new Intl.RelativeTimeFormat("id-ID", { numeric: "auto" });
+/** Semua waktu ditampilkan di WIB (UTC+7) agar konsisten di rekaman demo, apa pun zona browser. */
+export const TIME_ZONE = "Asia/Jakarta";
+export const TIME_ZONE_LABEL = "WIB";
+export const TIME_ZONE_HINT = "WIB (UTC+7)";
 
+const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+const dateTime = new Intl.DateTimeFormat("en-US", {
+  timeZone: TIME_ZONE,
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+const timeOnly = new Intl.DateTimeFormat("en-US", {
+  timeZone: TIME_ZONE,
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hourCycle: "h23",
+});
+const rtf = new Intl.RelativeTimeFormat("en-US", { numeric: "auto" });
+
+/** Rupiah integer gaya Inggris: `Rp349,000`. */
 export function formatIdr(value: number | null | undefined): string {
-  return value == null ? "—" : idr.format(value);
+  if (value == null || !Number.isFinite(value)) return "—";
+  return `${value < 0 ? "-" : ""}Rp${number.format(Math.abs(value))}`;
+}
+
+export function formatNumber(value: number | null | undefined): string {
+  return value == null ? "—" : number.format(value);
 }
 
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "—" : dateTime.format(d);
+  return Number.isNaN(d.getTime()) ? "—" : `${dateTime.format(d)} ${TIME_ZONE_LABEL}`;
 }
 
 export function formatTime(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "—" : timeOnly.format(d);
+  return Number.isNaN(d.getTime()) ? "—" : `${timeOnly.format(d)} ${TIME_ZONE_LABEL}`;
 }
 
 export function formatRelative(iso: string | null | undefined, now: number = Date.now()): string {
@@ -27,22 +52,29 @@ export function formatRelative(iso: string | null | undefined, now: number = Dat
   if (Number.isNaN(t)) return "—";
   const sec = Math.round((t - now) / 1000);
   const abs = Math.abs(sec);
-  if (abs < 45) return "baru saja";
+  if (abs < 45) return "just now";
   if (abs < 3600) return rtf.format(Math.round(sec / 60), "minute");
   if (abs < 86400) return rtf.format(Math.round(sec / 3600), "hour");
   return rtf.format(Math.round(sec / 86400), "day");
 }
 
 export function formatDuration(ms: number | null | undefined): string {
-  if (ms == null || Number.isNaN(ms)) return "—";
-  if (ms < 1000) return `${Math.round(ms)} ms`;
+  if (ms == null || !Number.isFinite(ms) || ms < 0) return "—";
+  // Bandingkan nilai SETELAH dibulatkan agar tidak muncul "1000 ms", "60 s", "60 min", "24.0 h".
+  if (Math.round(ms) < 1000) return `${Math.round(ms)} ms`;
   const s = ms / 1000;
-  if (s < 60) return `${s.toFixed(s < 10 ? 1 : 0)} dtk`;
+  if (s < 10 && Number(s.toFixed(1)) < 10) return `${s.toFixed(1)} s`;
+  if (Math.round(s) < 60) return `${Math.round(s)} s`;
   const m = s / 60;
-  if (m < 60) return `${Math.round(m)} mnt`;
+  if (Math.round(m) < 60) return `${Math.round(m)} min`;
   const h = m / 60;
-  if (h < 24) return `${h.toFixed(1)} jam`;
-  return `${(h / 24).toFixed(1)} hari`;
+  if (Number(h.toFixed(1)) < 24) return `${h.toFixed(1)} h`;
+  const d = (h / 24).toFixed(1);
+  return `${d} ${d === "1.0" ? "day" : "days"}`;
+}
+
+export function plural(n: number, one: string, many = `${one}s`): string {
+  return `${formatNumber(n)} ${n === 1 ? one : many}`;
 }
 
 export function diffMs(from: string | null | undefined, to: string | null | undefined): number | null {
@@ -58,39 +90,39 @@ export const CHANNEL_LABEL: Record<Channel, string> = {
 };
 
 export const STATUS_LABEL: Record<CaseStatus, string> = {
-  open: "Baru",
-  investigating: "Diselidiki",
-  awaiting_customer: "Menunggu pelanggan",
-  awaiting_approval: "Menunggu approval",
-  escalated: "Dieskalasi",
-  resolved: "Selesai",
+  open: "New",
+  investigating: "Investigating",
+  awaiting_customer: "Awaiting customer",
+  awaiting_approval: "Awaiting approval",
+  escalated: "Escalated",
+  resolved: "Resolved",
   error: "Error",
 };
 
 export const CATEGORY_LABEL: Record<CaseCategory, string> = {
-  late_delivery: "Terlambat",
-  lost_package: "Paket hilang",
-  not_received: "Tidak diterima",
-  status_inquiry: "Tanya status",
-  address_change: "Ubah alamat",
-  other: "Lainnya",
+  late_delivery: "Late delivery",
+  lost_package: "Lost package",
+  not_received: "Not received",
+  status_inquiry: "Status inquiry",
+  address_change: "Address change",
+  other: "Other",
 };
 
 export const RESOLUTION_LABEL: Record<ResolutionType, string> = {
-  auto_resolved: "Otomatis",
-  approved_by_staff: "Disetujui staf",
-  rejected_by_staff: "Ditolak staf",
-  escalated: "Eskalasi",
+  auto_resolved: "Auto-resolved",
+  approved_by_staff: "Approved by staff",
+  rejected_by_staff: "Rejected by staff",
+  escalated: "Escalated to human",
 };
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  processing: "Diproses",
-  shipped: "Dikirim",
-  in_transit: "Dalam perjalanan",
-  out_for_delivery: "Diantar kurir",
-  delivered: "Terkirim",
-  cancelled: "Dibatalkan",
-  refunded: "Direfund",
+  processing: "Processing",
+  shipped: "Shipped",
+  in_transit: "In transit",
+  out_for_delivery: "Out for delivery",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+  refunded: "Refunded",
 };
 
 export function labelOf<K extends string>(map: Record<K, string>, key: K | null | undefined): string {
