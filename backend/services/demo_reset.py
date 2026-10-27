@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
+from resolveai_common.repository import AGENT_EVENTS_SORT_KEY, MESSAGES_SORT_KEY
 from resolveai_common.seed_data import build_orders
 
 from .data import scan_all
@@ -57,12 +58,15 @@ def reset_demo(deps: Deps, now: datetime) -> DemoResetResult:
         deps.table("cases"),
         [{"case_id": c["case_id"]} for c in cases if c["case_id"] not in seeded_ids],
     )
-    for name in ("messages", "agent_events"):
+    for name, sort_key in (
+        ("messages", MESSAGES_SORT_KEY),
+        ("agent_events", AGENT_EVENTS_SORT_KEY),
+    ):
         table = deps.table(name)
         result.deleted[name] = _delete(
             table,
             [
-                {"case_id": item["case_id"], "sk": item["sk"]}
+                {"case_id": item["case_id"], sort_key: item[sort_key]}
                 for item in scan_all(table)
                 if item["case_id"] not in seeded_ids
             ],
