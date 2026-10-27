@@ -6,14 +6,22 @@ import { errorMessage, useApprovals } from "@/lib/api";
 
 export default function ApprovalsPage() {
   const pending = useApprovals("pending");
-  const all = useApprovals();
-  const history = (all.data ?? [])
-    .filter((a) => a.status !== "pending")
-    .sort((a, b) => (b.decided_at ?? b.requested_at).localeCompare(a.decided_at ?? a.requested_at));
+  // GET /approvals tanpa status = pending (default backend), jadi riwayat diambil per status.
+  const approved = useApprovals("approved");
+  const rejected = useApprovals("rejected");
+  const historyError = approved.error ?? rejected.error;
+  const historyLoaded = approved.data != null && rejected.data != null;
+  const history = [...(approved.data ?? []), ...(rejected.data ?? [])].sort((a, b) =>
+    (b.decided_at ?? b.requested_at).localeCompare(a.decided_at ?? a.requested_at),
+  );
 
+  const refreshHistory = () => {
+    void approved.mutate();
+    void rejected.mutate();
+  };
   const refresh = () => {
     void pending.mutate();
-    void all.mutate();
+    refreshHistory();
   };
 
   return (
@@ -50,11 +58,11 @@ export default function ApprovalsPage() {
 
       <section aria-labelledby="history-h" className="mt-10">
         <h2 id="history-h" className="mb-3 text-[15px] font-semibold text-stone-900">Riwayat</h2>
-        {all.error ? (
+        {historyError ? (
           <Card>
-            <ErrorState message={errorMessage(all.error)} onRetry={() => all.mutate()} />
+            <ErrorState message={errorMessage(historyError)} onRetry={refreshHistory} />
           </Card>
-        ) : !all.data ? (
+        ) : !historyLoaded ? (
           <Card>
             <LoadingRows rows={3} />
           </Card>

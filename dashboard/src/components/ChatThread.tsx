@@ -27,12 +27,20 @@ function sortKey(m: Message): string {
 }
 
 export function ChatThread({ messages }: { messages: Message[] }) {
-  const endRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
+  const prevCount = useRef<number | null>(null);
   const sorted = [...messages].sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
   const count = sorted.length;
 
+  // Thread tumbuh mengikuti isi (tanpa scroll tersembunyi). Saat ada pesan baru, gulir
+  // hanya kontainer thread bila memang meluap — tidak pernah window, tidak saat muat awal.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    const prev = prevCount.current;
+    prevCount.current = count;
+    const el = listRef.current;
+    if (prev == null || count <= prev || !el || el.scrollHeight <= el.clientHeight) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : "smooth" });
   }, [count]);
 
   if (count === 0) {
@@ -40,7 +48,7 @@ export function ChatThread({ messages }: { messages: Message[] }) {
   }
 
   return (
-    <ol className="max-h-[560px] space-y-4 overflow-y-auto px-5 py-4" aria-label="Percakapan">
+    <ol ref={listRef} className="space-y-4 overflow-y-auto px-5 py-4" aria-label="Percakapan">
       {sorted.map((m, i) => {
         const inbound = m.direction === "inbound";
         const delivery = m.delivery_status ? DELIVERY[m.delivery_status] : null;
@@ -75,7 +83,6 @@ export function ChatThread({ messages }: { messages: Message[] }) {
           </li>
         );
       })}
-      <div ref={endRef} />
     </ol>
   );
 }
