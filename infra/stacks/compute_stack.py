@@ -27,7 +27,15 @@ DISPATCHER_TABLES = (
     "approvals",
     "processed_events",
 )
-API_TABLES = ("customers", "orders", "cases", "messages", "agent_events", "approvals")
+API_TABLES = (
+    "customers",
+    "orders",
+    "cases",
+    "messages",
+    "agent_events",
+    "approvals",
+    "processed_events",  # dedupe untuk /simulate/inbound
+)
 
 
 class ComputeStack(Stack):

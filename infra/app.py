@@ -3,7 +3,6 @@
 import os
 
 import aws_cdk as cdk
-
 from stacks.compute_stack import ComputeStack
 from stacks.data_stack import DataStack
 from stacks.knowledge_stack import KnowledgeStack
