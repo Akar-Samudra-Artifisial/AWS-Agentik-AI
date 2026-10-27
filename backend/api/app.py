@@ -145,6 +145,7 @@ def _summaries(deps: Deps, cases: list[Case]) -> list[CaseSummary]:
                 created_at=case.created_at,
                 updated_at=case.updated_at,
                 resolution_type=case.resolution_type,
+                resolution_summary=case.resolution.summary if case.resolution else None,
             )
         )
     return summaries

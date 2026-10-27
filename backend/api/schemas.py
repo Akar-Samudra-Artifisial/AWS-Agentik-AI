@@ -64,6 +64,7 @@ class CaseSummary(BaseModel):
     created_at: str
     updated_at: str
     resolution_type: ResolutionType | None = None
+    resolution_summary: str | None = None
 
 
 class CaseDetail(BaseModel):
