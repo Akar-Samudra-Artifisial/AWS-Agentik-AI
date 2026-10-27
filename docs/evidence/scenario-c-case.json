@@ -1,6 +1,6 @@
 {
   "case": {
-    "case_id": "CASE-20261027-50CE",
+    "case_id": "CASE-20261027-FE0B",
     "customer_id": "CUST-0001",
     "order_id": "ORD-1003",
     "channel": "email",
@@ -10,22 +10,22 @@
     "resolution_type": "escalated",
     "resolution": null,
     "summary": "ORD-1003 status delivered tapi pelanggan tidak terima, ancaman lapor polisi",
-    "first_inbound_at": "2026-10-27T09:23:39Z",
-    "first_response_at": "2026-10-27T09:23:49.301343Z",
+    "first_inbound_at": "2026-10-27T15:17:26Z",
+    "first_response_at": "2026-10-27T15:17:37.981952Z",
     "resolved_at": null,
-    "created_at": "2026-10-27T09:23:39Z",
-    "updated_at": "2026-10-27T09:23:53Z",
+    "created_at": "2026-10-27T15:17:26Z",
+    "updated_at": "2026-10-27T15:17:40Z",
     "lock_until": null,
     "seeded": false
   },
   "customer": {
     "customer_id": "CUST-0001",
     "name": "Rani",
-    "phone_e164": "+62877****348",
+    "phone_e164": "+62853****322",
     "email": "l***@gmail.com",
     "language": "id",
     "preferred_channel": "whatsapp",
-    "created_at": "2026-07-29T08:23:37Z"
+    "created_at": "2026-07-29T12:54:55Z"
   },
   "order": {
     "order_id": "ORD-1003",
@@ -41,31 +41,31 @@
     "total_idr": 259000,
     "courier": "NusaExpress",
     "tracking_number": "NX100388",
-    "shipped_at": "2026-10-22T09:22:09Z",
-    "eta": "2026-10-25T09:22:09Z",
-    "last_scan_at": "2026-10-25T09:22:09Z",
+    "shipped_at": "2026-10-22T15:15:45Z",
+    "eta": "2026-10-25T15:15:45Z",
+    "last_scan_at": "2026-10-25T15:15:45Z",
     "last_scan_location": "Bandung",
     "tracking_events": [
       {
-        "ts": "2026-10-22T09:22:09Z",
+        "ts": "2026-10-22T15:15:45Z",
         "location": "Gudang Jakarta",
         "desc": "Paket diserahkan ke kurir"
       },
       {
-        "ts": "2026-10-25T09:22:09Z",
+        "ts": "2026-10-25T15:15:45Z",
         "location": "Bandung",
         "desc": "Diterima penerima"
       }
     ],
     "redelivery_at": null,
     "refund": null,
-    "created_at": "2026-10-21T09:22:09Z"
+    "created_at": "2026-10-21T15:15:45Z"
   },
   "messages": [
     {
-      "case_id": "CASE-20261027-50CE",
-      "msg_id": "a8cfdec1bfe94ebba0a046267aeaac2b",
-      "ts": "2026-10-27T09:23:39Z",
+      "case_id": "CASE-20261027-FE0B",
+      "msg_id": "3353094e81f54effbb4c7c50afef5dfe",
+      "ts": "2026-10-27T15:17:26Z",
       "direction": "inbound",
       "author": "customer",
       "channel": "email",
@@ -74,27 +74,27 @@
       "delivery_status": "delivered",
       "error": null,
       "simulated": true,
-      "created_at": "2026-10-27T09:23:39Z"
+      "created_at": "2026-10-27T15:17:26Z"
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "msg_id": "MSG-fd3028f93022",
-      "ts": "2026-10-27T09:23:49.301343Z",
+      "case_id": "CASE-20261027-FE0B",
+      "msg_id": "MSG-294aed4f1f26",
+      "ts": "2026-10-27T15:17:37.981952Z",
       "direction": "outbound",
       "author": "agent",
       "channel": "email",
-      "body": "Terima kasih atas kesabaran Anda. Kasus Anda sudah kami teruskan ke tim kami dan staf akan menghubungi Anda segera.",
-      "provider_message_id": "010001a17cac4d42-e18f5dc8-b145-4c22-8c52-fbda25445e77-000000",
+      "body": "Terima kasih atas kesabaran Anda. Kasus Anda sudah kami teruskan ke tim kami dan staf akan menghubungi Anda pada jam kerja berikutnya (08.00-20.00 WIB).",
+      "provider_message_id": "010001a17df039ca-62b82519-f0db-4ad3-8a12-8ef5082c261b-000000",
       "delivery_status": "sent",
       "error": null,
       "simulated": false,
-      "created_at": "2026-10-27T09:23:49.301343Z"
+      "created_at": "2026-10-27T15:17:37.981952Z"
     }
   ],
   "events": [
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:45.614922Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:34.213760Z",
       "seq": 0,
       "type": "tool_call",
       "tool": "update_case",
@@ -104,19 +104,19 @@
       "ok": true
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:45.639463Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:34.244398Z",
       "seq": 1,
       "type": "tool_result",
       "tool": "update_case",
       "input": null,
-      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-50CE\", \"channel\": \"email\", \"status\": \"investigating\", \"category\": \"other\", \"priority\": \"normal\", \"summary\": \"\"}}",
-      "latency_ms": 13,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-FE0B\", \"channel\": \"email\", \"status\": \"investigating\", \"category\": \"other\", \"priority\": \"normal\", \"summary\": \"\"}}",
+      "latency_ms": 17,
       "ok": true
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:45.646365Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:34.251081Z",
       "seq": 2,
       "type": "tool_call",
       "tool": "get_order",
@@ -126,19 +126,19 @@
       "ok": true
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:45.673670Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:34.284234Z",
       "seq": 3,
       "type": "tool_result",
       "tool": "get_order",
       "input": null,
-      "output": "{\"ok\": true, \"order\": {\"order_id\": \"ORD-1003\", \"status\": \"delivered\", \"items\": [{\"name\": \"Headphone\", \"qty\": 1, \"price_idr\": 259000}], \"total_idr\": 259000, \"courier\": \"NusaExpress\", \"tracking_number\": \"NX100388\", \"shipped_at\": \"2026-10-22T09:22:09Z\", \"eta\": \"2026-10-25T09:22:09Z\", \"last_scan_at\": \"2026-10-25T09:22:09Z\", \"last_scan_location\": \"Bandung\", \"tracking_events\": [{\"ts\": \"2026-10-22T09:22:09Z\", \"location\": \"Gudang Jakarta\", \"desc\": \"Paket diserahkan ke kurir\"}, {\"ts\": \"2026-10-25T09:22:09Z\", \"location\": \"Bandung\", \"desc\": \"Diterima penerima\"}], \"created_at\": \"2026-10-21T09:22:09Z\"}, \"days_late\": 0, \"days_since_last_scan\": 2, \"eligibility\": {\"apology\": false, \"voucher\": false, \"redelivery\": false, \"refund_lost_package\": false, \"escalate_not_received\": true}, \"simulated_courier_and_payment\": true}",
-      "latency_ms": 21,
+      "output": "{\"ok\": true, \"order\": {\"order_id\": \"ORD-1003\", \"status\": \"delivered\", \"items\": [{\"name\": \"Headphone\", \"qty\": 1, \"price_idr\": 259000}], \"total_idr\": 259000, \"courier\": \"NusaExpress\", \"tracking_number\": \"NX100388\", \"shipped_at\": \"2026-10-22T15:15:45Z\", \"eta\": \"2026-10-25T15:15:45Z\", \"last_scan_at\": \"2026-10-25T15:15:45Z\", \"last_scan_location\": \"Bandung\", \"tracking_events\": [{\"ts\": \"2026-10-22T15:15:45Z\", \"location\": \"Gudang Jakarta\", \"desc\": \"Paket diserahkan ke kurir\"}, {\"ts\": \"2026-10-25T15:15:45Z\", \"location\": \"Bandung\", \"desc\": \"Diterima penerima\"}], \"created_at\": \"2026-10-21T15:15:45Z\"}, \"days_late\": 0, \"days_since_last_scan\": 2, \"eligibility\": {\"apology\": false, \"voucher\": false, \"redelivery\": false, \"refund_lost_package\": false, \"escalate_not_received\": true}, \"simulated_courier_and_payment\": true}",
+      "latency_ms": 27,
       "ok": true
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:49.066888Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:37.748882Z",
       "seq": 4,
       "type": "tool_call",
       "tool": "update_case",
@@ -148,57 +148,57 @@
       "ok": true
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:49.086854Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:37.769782Z",
       "seq": 5,
       "type": "tool_result",
       "tool": "update_case",
       "input": null,
-      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-50CE\", \"order_id\": \"ORD-1003\", \"channel\": \"email\", \"status\": \"investigating\", \"category\": \"not_received\", \"priority\": \"high\", \"summary\": \"ORD-1003 status delivered tapi pelanggan tidak terima, ancaman lapor polisi\"}}",
-      "latency_ms": 13,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-FE0B\", \"order_id\": \"ORD-1003\", \"channel\": \"email\", \"status\": \"investigating\", \"category\": \"not_received\", \"priority\": \"high\", \"summary\": \"ORD-1003 status delivered tapi pelanggan tidak terima, ancaman lapor polisi\"}}",
+      "latency_ms": 14,
       "ok": true
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:49.093524Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:37.776076Z",
       "seq": 6,
       "type": "tool_call",
       "tool": "escalate_to_human",
-      "input": "{\"reason\": \"Paket ORD-1003 status delivered tapi pelanggan klaim tidak diterima, ancaman lapor polisi\", \"priority\": \"high\"}",
+      "input": "{\"reason\": \"Pesanan ORD-1003 status delivered tapi pelanggan klaim tidak menerima, disertai ancaman lapor polisi\", \"priority\": \"high\"}",
       "output": null,
       "latency_ms": null,
       "ok": true
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:49.111366Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:37.795525Z",
       "seq": 7,
       "type": "escalation",
       "tool": null,
-      "input": "{\"reason\": \"Paket ORD-1003 status delivered tapi pelanggan klaim tidak diterima, ancaman lapor polisi\", \"priority\": \"high\"}",
+      "input": "{\"reason\": \"Pesanan ORD-1003 status delivered tapi pelanggan klaim tidak menerima, disertai ancaman lapor polisi\", \"priority\": \"high\"}",
       "output": null,
       "latency_ms": null,
       "ok": true
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:49.322333Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:38.005618Z",
       "seq": 8,
       "type": "tool_result",
       "tool": "escalate_to_human",
       "input": null,
-      "output": "{\"ok\": true, \"escalated\": true, \"priority\": \"high\", \"staff_on_duty\": true, \"customer_notified\": true}",
-      "latency_ms": 223,
+      "output": "{\"ok\": true, \"escalated\": true, \"priority\": \"high\", \"staff_on_duty\": false, \"customer_notified\": true}",
+      "latency_ms": 224,
       "ok": true
     },
     {
-      "case_id": "CASE-20261027-50CE",
-      "ts": "2026-10-27T09:23:53.465688Z",
+      "case_id": "CASE-20261027-FE0B",
+      "ts": "2026-10-27T15:17:40.778257Z",
       "seq": 9,
       "type": "model_message",
       "tool": null,
       "input": null,
-      "output": "\"**Ringkasan internal:** Kasus ORD-1003 status \\\"delivered\\\" tetapi pelanggan klaim tidak menerima dan mengancam lapor polisi. Sesuai aturan, kasus ini langsung dieskalasi ke staf manusia dengan prioritas tinggi. Pelanggan sudah diberitahu bahwa tim akan menangani.\"",
+      "output": "\"**Ringkasan internal:** Kasus ORD-1003 status delivered tapi pelanggan tidak menerima, disertai ancaman lapor polisi. Sudah dieskalasi ke tim staf dengan prioritas tinggi sesuai kebijakan. Pelanggan telah diberitahu bahwa tim akan menangani segera.\"",
       "latency_ms": null,
       "ok": true
     }
