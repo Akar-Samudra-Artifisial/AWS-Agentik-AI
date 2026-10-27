@@ -5,6 +5,7 @@ import { type FormEvent, useEffect, useId, useState } from "react";
 import { caseHref } from "@/components/CaseTable";
 import { ChannelBadge } from "@/components/ChannelBadge";
 import { StatusBadge } from "@/components/StatusBadge";
+import { IconArrowRight, IconRefresh, IconSend } from "@/components/icons";
 import { Button, Card, CardHeader, EmptyState, PageHeader, SectionHeading, SimulatedTag, cx } from "@/components/ui";
 import type { CaseSummary, Channel } from "@/lib/api-types";
 import { DEMO_CUSTOMER_NAME, DEMO_PHONE_E164, errorMessage, fetchCases, resetDemo, simulateInbound, useCase } from "@/lib/api";
@@ -87,12 +88,12 @@ export default function SimulatorPage() {
         action={<SimulatedTag label="Simulated inbound" title="Inbound messages are injected from this page; agent replies are real" />}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <Card>
-          <CardHeader title="Inbound message" subtitle="Compose a message as if the customer sent it." />
-          <form onSubmit={send} className="space-y-5 px-5 py-5">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <Card className="flex flex-col xl:col-span-7">
+          <CardHeader icon={<IconSend />} title="Inbound message" subtitle="Compose a message as if the customer sent it." />
+          <form onSubmit={send} className="flex flex-1 flex-col space-y-6 px-5 pt-5 pb-5">
             <fieldset>
-              <legend className="mb-2 text-sm font-medium text-stone-700">Customer</legend>
+              <legend className="mb-2 text-[13px] font-medium text-zinc-700">Customer</legend>
               <div className="flex flex-wrap gap-2">
                 <RadioPill
                   name="customer"
@@ -105,7 +106,7 @@ export default function SimulatorPage() {
               </div>
               {customer === "custom" ? (
                 <div className="mt-3">
-                  <label htmlFor={ids.phone} className="mb-1 block text-xs font-medium text-stone-600">
+                  <label htmlFor={ids.phone} className="mb-1.5 block text-xs font-medium text-zinc-600">
                     E.164 phone number (synthetic data only)
                   </label>
                   <input
@@ -116,9 +117,9 @@ export default function SimulatorPage() {
                     placeholder="+62…"
                     aria-invalid={customPhone.length > 0 && !phoneValid}
                     aria-describedby={`${ids.phone}-hint`}
-                    className="w-64 rounded-lg border border-stone-300 px-3 py-2 font-mono text-sm focus:border-brand-600 aria-invalid:border-red-500"
+                    className="h-9 w-64 rounded-lg bg-white px-3 font-mono text-sm shadow-xs ring-1 ring-zinc-950/10 ring-inset focus:ring-2 focus:ring-accent-500 focus:outline-none aria-invalid:ring-danger-500"
                   />
-                  <p id={`${ids.phone}-hint`} className="mt-1 text-xs text-stone-500">
+                  <p id={`${ids.phone}-hint`} className="mt-1.5 text-xs text-zinc-500">
                     Unknown numbers are created as a new customer with no orders.
                   </p>
                 </div>
@@ -126,7 +127,7 @@ export default function SimulatorPage() {
             </fieldset>
 
             <fieldset>
-              <legend className="mb-2 text-sm font-medium text-stone-700">Channel</legend>
+              <legend className="mb-2 text-[13px] font-medium text-zinc-700">Channel</legend>
               <div className="flex flex-wrap gap-2">
                 {CHANNELS.map((c) => (
                   <RadioPill key={c} name="channel" checked={channel === c} onChange={() => setChannel(c)} label={CHANNEL_LABEL[c]} />
@@ -135,7 +136,7 @@ export default function SimulatorPage() {
             </fieldset>
 
             <div>
-              <label htmlFor={ids.text} className="mb-1 block text-sm font-medium text-stone-700">
+              <label htmlFor={ids.text} className="mb-2 block text-[13px] font-medium text-zinc-700">
                 Message
               </label>
               <textarea
@@ -147,46 +148,57 @@ export default function SimulatorPage() {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void send();
                 }}
                 placeholder="Type a customer message or pick a preset…"
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-[15px] focus:border-brand-600"
+                className="w-full rounded-lg bg-white px-3.5 py-2.5 text-[15px] leading-relaxed shadow-xs ring-1 ring-zinc-950/10 ring-inset placeholder:text-zinc-400 focus:ring-2 focus:ring-accent-500 focus:outline-none"
               />
             </div>
 
             {error ? (
-              <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+              <p role="alert" className="rounded-lg bg-danger-50 px-3 py-2 text-sm text-danger-800 ring-1 ring-danger-200 ring-inset">
                 Couldn’t send: {error}
               </p>
             ) : null}
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="-mx-5 -mb-5 mt-auto flex flex-wrap items-center gap-3 border-t border-zinc-100 bg-zinc-50/70 px-5 py-4">
               <Button type="submit" variant="primary" loading={sending} disabled={!canSend}>
+                <IconSend />
                 Send message
               </Button>
-              <span className="text-xs text-stone-500">or press ⌘/Ctrl + Enter</span>
-              {!phoneValid ? <span className="text-xs text-amber-700">Choose a customer with a valid E.164 number.</span> : null}
+              <span className="text-xs text-zinc-500">
+                or press <kbd className="rounded border border-zinc-200 bg-white px-1 font-mono text-[11px]">⌘/Ctrl</kbd> +{" "}
+                <kbd className="rounded border border-zinc-200 bg-white px-1 font-mono text-[11px]">Enter</kbd>
+              </span>
+              {!phoneValid ? <span className="text-xs text-warning-700">Choose a customer with a valid E.164 number.</span> : null}
             </div>
           </form>
         </Card>
 
-        <div className="space-y-4">
+        <div className="space-y-6 xl:col-span-5">
           <Card>
             <CardHeader title="Scenario presets" subtitle="Fills in the message. Send the next step after the agent replies." />
-            <ul className="divide-y divide-stone-100">
+            <ul className="space-y-3 p-3">
               {PRESETS.map((p) => (
-                <li key={p.id} className="px-5 py-3.5">
-                  <p className="font-medium text-stone-900">{p.title}</p>
-                  <p className="mt-0.5 text-xs text-stone-500">{p.expect}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                <li key={p.id} className="flex gap-3 rounded-lg p-3 ring-1 ring-zinc-950/[0.06] ring-inset">
+                  <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent-50 font-mono text-sm font-semibold text-accent-700 ring-1 ring-accent-200 ring-inset">
+                    {p.id}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-zinc-900">{p.title.replace(/^[A-Z] · /, "")}</p>
+                  <p className="mt-0.5 font-mono text-[11.5px] leading-snug text-zinc-500">{p.expect}</p>
+                  <div className="mt-2.5 flex flex-col gap-1.5">
                     {p.steps.map((s, i) => (
                       <button
                         key={s}
                         type="button"
                         onClick={() => setText(s)}
-                        className="max-w-full truncate rounded-md border border-stone-300 bg-stone-50 px-2.5 py-1 text-left text-xs text-stone-700 hover:border-brand-600 hover:bg-brand-50"
+                        className="group flex max-w-full items-center gap-2 rounded-md bg-zinc-50 px-2.5 py-1.5 text-left text-xs text-zinc-700 ring-1 ring-zinc-950/[0.06] ring-inset transition-colors hover:bg-accent-50 hover:text-accent-900 hover:ring-accent-200"
                         title={s}
                       >
-                        <span className="font-semibold">Step {i + 1}:</span> {s}
+                        <span className="shrink-0 font-semibold text-zinc-500 group-hover:text-accent-700">Step {i + 1}</span>
+                        <span className="truncate">{s}</span>
+                        <IconArrowRight className="ml-auto size-3.5 shrink-0 text-zinc-300 group-hover:text-accent-600" />
                       </button>
                     ))}
+                  </div>
                   </div>
                 </li>
               ))}
@@ -239,13 +251,14 @@ function ResetDemoCard({ onReset }: { onReset: () => void }) {
 
   return (
     <Card>
-      <CardHeader title="Reset demo" subtitle="Restore seed data before the next recording take." />
+      <CardHeader icon={<IconRefresh />} title="Reset demo" subtitle="Restore seed data before the next recording take." />
       <div className="space-y-3 px-5 py-4">
+        <p className="text-xs text-zinc-500">Deletes non-seed cases, messages, timelines and approvals. You’ll be asked to confirm.</p>
         <Button variant="danger" loading={busy} onClick={() => void reset()}>
           Reset demo
         </Button>
         {status ? (
-          <p role={status.ok ? "status" : "alert"} className={cx("text-xs", status.ok ? "text-stone-600" : "text-red-700")}>
+          <p role={status.ok ? "status" : "alert"} className={cx("text-xs", status.ok ? "text-success-700" : "text-danger-700")}>
             {status.text}
           </p>
         ) : null}
@@ -270,12 +283,12 @@ function RadioPill({
   return (
     <label
       className={cx(
-        "inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-600",
-        checked ? "border-brand-600 bg-brand-50 text-brand-900" : "border-stone-300 bg-white text-stone-700 hover:bg-stone-50",
+        "inline-flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm ring-inset transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent-500",
+        checked ? "bg-accent-50 font-medium text-accent-900 ring-2 ring-accent-500" : "bg-white text-zinc-700 shadow-xs ring-1 ring-zinc-950/10 hover:bg-zinc-50",
         disabled && "cursor-not-allowed opacity-50",
       )}
     >
-      <input type="radio" name={name} checked={checked} onChange={onChange} disabled={disabled} className="accent-brand-700" />
+      <input type="radio" name={name} checked={checked} onChange={onChange} disabled={disabled} className="accent-accent-600" />
       {label}
     </label>
   );
@@ -317,22 +330,22 @@ function SentItem({ sent }: { sent: Sent }) {
   const status = detail.data?.case.status ?? found?.status;
 
   return (
-    <li className="flex flex-wrap items-center gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 shadow-sm">
+    <li className="flex flex-wrap items-center gap-3 rounded-xl bg-white px-4 py-3 shadow-card ring-1 ring-zinc-950/[0.06]">
       <ChannelBadge channel={sent.channel} />
-      <p className="min-w-0 flex-1 truncate text-sm text-stone-800" title={sent.text}>
+      <p className="min-w-0 flex-1 truncate text-sm text-zinc-800" title={sent.text}>
         “{sent.text}”
       </p>
       {caseId ? (
         <>
           {status ? <StatusBadge status={status} /> : null}
-          <Link href={caseHref(caseId)} className="font-mono text-sm font-medium text-brand-700 hover:underline">
+          <Link href={caseHref(caseId)} className="font-mono text-[13px] font-medium text-accent-700 hover:underline">
             Open {caseId} →
           </Link>
         </>
       ) : timedOut ? (
-        <span className="text-sm text-amber-700">Case hasn’t appeared yet. Check the Cases page.</span>
+        <span className="text-sm text-warning-700">Case hasn’t appeared yet. Check the Cases page.</span>
       ) : (
-        <span role="status" className="text-sm text-stone-500">Waiting for the case to be created…</span>
+        <span role="status" className="text-sm text-zinc-500">Waiting for the case to be created…</span>
       )}
     </li>
   );

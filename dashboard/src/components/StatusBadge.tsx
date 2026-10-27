@@ -1,70 +1,77 @@
+import type { ReactNode } from "react";
 import type { ApprovalStatus, CaseStatus, Priority } from "@/lib/api-types";
 import { STATUS_LABEL } from "@/lib/format";
+import { IconAlert } from "./icons";
 import { cx } from "./ui";
 
 /*
- * Satu palet status untuk seluruh dashboard:
- * hijau = selesai/approved, kuning = menunggu, merah = eskalasi/error/rejected, biru = diproses, abu = baru.
+ * Satu palet status untuk seluruh dashboard (token semantik di globals.css):
+ * success = selesai/approved, warning = menunggu, danger = eskalasi/error/rejected, info = diproses, netral = baru.
+ * Label teks selalu ada sehingga status tidak bergantung pada warna saja.
  */
-const CASE_STYLE: Record<CaseStatus, string> = {
-  open: "bg-stone-100 text-stone-700 ring-stone-300",
-  investigating: "bg-blue-50 text-blue-800 ring-blue-300",
-  awaiting_customer: "bg-amber-50 text-amber-800 ring-amber-300",
-  awaiting_approval: "bg-amber-100 text-amber-900 ring-amber-400",
-  escalated: "bg-red-50 text-red-800 ring-red-300",
-  resolved: "bg-emerald-50 text-emerald-800 ring-emerald-300",
-  error: "bg-red-100 text-red-900 ring-red-400",
+export type Tone = "neutral" | "info" | "warning" | "danger" | "success" | "accent";
+
+export const TONE_BADGE: Record<Tone, string> = {
+  neutral: "bg-zinc-50 text-zinc-700 ring-zinc-950/10",
+  info: "bg-info-50 text-info-800 ring-info-200",
+  warning: "bg-warning-50 text-warning-800 ring-warning-200",
+  danger: "bg-danger-50 text-danger-800 ring-danger-200",
+  success: "bg-success-50 text-success-800 ring-success-200",
+  accent: "bg-accent-50 text-accent-800 ring-accent-200",
 };
 
-// Ikon teks agar status tidak bergantung pada warna saja.
-const CASE_ICON: Record<CaseStatus, string> = {
-  open: "○",
-  investigating: "◔",
-  awaiting_customer: "◷",
-  awaiting_approval: "◷",
-  escalated: "▲",
-  resolved: "✓",
-  error: "✕",
+export const TONE_DOT: Record<Tone, string> = {
+  neutral: "bg-zinc-400",
+  info: "bg-info-500",
+  warning: "bg-warning-500",
+  danger: "bg-danger-500",
+  success: "bg-success-500",
+  accent: "bg-accent-500",
 };
 
-const BADGE = "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset whitespace-nowrap";
+export const CASE_TONE: Record<CaseStatus, Tone> = {
+  open: "neutral",
+  investigating: "info",
+  awaiting_customer: "warning",
+  awaiting_approval: "warning",
+  escalated: "danger",
+  resolved: "success",
+  error: "danger",
+};
 
-export function StatusBadge({ status }: { status: CaseStatus }) {
+const BADGE =
+  "inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset whitespace-nowrap";
+
+export function Badge({ tone = "neutral", children, dot = true }: { tone?: Tone; children: ReactNode; dot?: boolean }) {
   return (
-    <span className={cx(BADGE, CASE_STYLE[status] ?? CASE_STYLE.open)}>
-      <span aria-hidden="true">{CASE_ICON[status] ?? "•"}</span>
-      {STATUS_LABEL[status] ?? status}
+    <span className={cx(BADGE, TONE_BADGE[tone])}>
+      {dot ? <span aria-hidden="true" className={cx("size-1.5 rounded-full", TONE_DOT[tone])} /> : null}
+      {children}
     </span>
   );
 }
 
-const APPROVAL_STYLE: Record<ApprovalStatus, string> = {
-  pending: "bg-amber-100 text-amber-900 ring-amber-400",
-  approved: "bg-emerald-50 text-emerald-800 ring-emerald-300",
-  rejected: "bg-red-50 text-red-800 ring-red-300",
-};
+export function StatusBadge({ status }: { status: CaseStatus }) {
+  return <Badge tone={CASE_TONE[status] ?? "neutral"}>{STATUS_LABEL[status] ?? status}</Badge>;
+}
 
-const APPROVAL_ICON: Record<ApprovalStatus, string> = { pending: "◷", approved: "✓", rejected: "✕" };
+const APPROVAL_TONE: Record<ApprovalStatus, Tone> = { pending: "warning", approved: "success", rejected: "danger" };
 const APPROVAL_LABEL: Record<ApprovalStatus, string> = { pending: "Pending", approved: "Approved", rejected: "Rejected" };
 
 export function ApprovalStatusBadge({ status }: { status: ApprovalStatus }) {
-  return (
-    <span className={cx(BADGE, APPROVAL_STYLE[status] ?? APPROVAL_STYLE.pending)}>
-      <span aria-hidden="true">{APPROVAL_ICON[status] ?? "•"}</span>
-      {APPROVAL_LABEL[status] ?? status}
-    </span>
-  );
+  return <Badge tone={APPROVAL_TONE[status] ?? "warning"}>{APPROVAL_LABEL[status] ?? status}</Badge>;
 }
 
 /** `short` dipakai di kolom tabel berjudul "Priority" agar tidak redundan. */
 export function PriorityBadge({ priority, short = false }: { priority: Priority; short?: boolean }) {
   const suffix = short ? "" : " priority";
   if (priority !== "high") {
-    return <span className={cx(BADGE, "bg-white text-stone-600 ring-stone-200")}>Normal{suffix}</span>;
+    return <span className="text-xs font-medium whitespace-nowrap text-zinc-500">Normal{suffix}</span>;
   }
   return (
-    <span className={cx(BADGE, "bg-red-600 font-semibold text-white ring-red-600")}>
-      <span aria-hidden="true">!</span>High{suffix}
+    <span className={cx(BADGE, "bg-danger-600 font-semibold text-white ring-danger-700")}>
+      <IconAlert className="size-3" />
+      High{suffix}
     </span>
   );
 }

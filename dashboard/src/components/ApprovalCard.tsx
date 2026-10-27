@@ -6,6 +6,7 @@ import type { Approval, ApprovalWithCase } from "@/lib/api-types";
 import { ApiError, STAFF_NAME, decideApproval, errorMessage } from "@/lib/api";
 import { formatDateTime, formatIdr, formatRelative } from "@/lib/format";
 import { maskText } from "@/lib/mask";
+import { IconCheck, IconX } from "./icons";
 import { ApprovalStatusBadge } from "./StatusBadge";
 import { Button, SimulatedTag, cx } from "./ui";
 
@@ -63,63 +64,74 @@ export function ApprovalCard({
     }
   }
 
+  const pad = compact ? "px-4" : "px-5";
+
   return (
     <article
       className={cx(
-        "rounded-xl border bg-white shadow-sm",
-        isPending ? "border-amber-300 ring-1 ring-amber-200" : "border-stone-200",
+        "overflow-hidden rounded-xl bg-white shadow-card ring-1",
+        isPending ? "ring-warning-300" : "ring-zinc-950/[0.06]",
       )}
       aria-label={`Approval ${approval.approval_id}`}
     >
-      <div className={cx(compact ? "px-4 pt-3" : "px-5 pt-4")}>
+      {isPending ? <div aria-hidden="true" className="h-1 bg-warning-500" /> : null}
+      <div className={cx(pad, compact ? "pt-3.5" : "pt-5")}>
         <div className="flex items-center justify-between gap-3">
-          <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-stone-500">
-            Refund request · <span className="font-mono normal-case">{approval.approval_id}</span>
+          <p className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+            Refund request · <span className="font-mono tracking-normal normal-case">{approval.approval_id}</span>
           </p>
           <ApprovalStatusBadge status={approval.status} />
         </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <p className={cx("font-semibold tabular-nums text-stone-900", compact ? "text-xl" : "text-2xl")}>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <p
+            className={cx(
+              "leading-none font-semibold tracking-[-0.03em] tabular-nums text-zinc-950",
+              compact ? "text-[22px]" : "text-[34px]",
+            )}
+          >
             {formatIdr(approval.amount_idr)}
           </p>
           <SimulatedTag label="Simulated payment" />
         </div>
-        <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-sm text-stone-600">
-          <Link
-            href={`/case/?id=${encodeURIComponent(approval.case_id)}`}
-            className="font-mono whitespace-nowrap text-brand-700 underline-offset-2 hover:underline"
-          >
-            {approval.case_id}
-          </Link>
-          {approval.order_id ? (
-            <>
-              <span aria-hidden="true">·</span>
-              <span className="font-mono whitespace-nowrap">{approval.order_id}</span>
-            </>
-          ) : null}
-          {customer ? (
-            <>
-              <span aria-hidden="true">·</span>
-              <span>{customer}</span>
-            </>
-          ) : null}
-        </p>
       </div>
 
-      <div className={cx("space-y-2 text-sm", compact ? "px-4 py-2.5" : "px-5 py-3")}>
+      <dl className={cx("mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-[13px]", pad, compact && "mt-3")}>
+        <div className="min-w-0">
+          <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Case</dt>
+          <dd className="mt-0.5 truncate">
+            <Link
+              href={`/case/?id=${encodeURIComponent(approval.case_id)}`}
+              className="font-mono text-[12.5px] font-medium whitespace-nowrap text-accent-700 underline-offset-2 hover:underline"
+            >
+              {approval.case_id}
+            </Link>
+          </dd>
+        </div>
+        <div className="min-w-0">
+          <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{customer ? "Customer" : "Order"}</dt>
+          <dd className="mt-0.5 truncate text-zinc-800">
+            {customer ?? <span className="font-mono text-[12.5px]">{approval.order_id ?? "—"}</span>}
+            {customer && approval.order_id ? (
+              <span className="ml-1.5 font-mono text-[11.5px] text-zinc-400">{approval.order_id}</span>
+            ) : null}
+          </dd>
+        </div>
+      </dl>
+
+      <div className={cx("space-y-2.5 text-[13px]", pad, compact ? "py-3" : "py-4")}>
         {approval.reason ? (
-          <p>
-            <span className="font-medium text-stone-700">Reason: </span>
-            <span className="text-stone-800">{maskText(approval.reason)}</span>
-          </p>
+          <div className="rounded-lg bg-zinc-50 px-3 py-2.5 ring-1 ring-zinc-950/[0.04] ring-inset">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Agent’s reason</p>
+            <p className={cx("mt-1 leading-relaxed text-zinc-800", compact && "line-clamp-2")}>{maskText(approval.reason)}</p>
+          </div>
         ) : null}
         {summary && !compact ? (
-          <p className="text-stone-600">
-            <span className="font-medium text-stone-700">Case summary: </span>
+          <p className="leading-relaxed text-zinc-600">
+            <span className="font-medium text-zinc-800">Case summary: </span>
             {maskText(summary)}
           </p>
         ) : null}
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-zinc-500">
           <span title={formatDateTime(approval.requested_at)}>Requested {formatRelative(approval.requested_at)}</span>
           {approval.decided_at ? (
             <span title={formatDateTime(approval.decided_at)}>
@@ -127,14 +139,14 @@ export function ApprovalCard({
             </span>
           ) : null}
         </p>
-        {approval.note ? <p className="text-xs text-stone-600">Note: {maskText(approval.note)}</p> : null}
+        {approval.note ? <p className="text-xs text-zinc-600">Note: {maskText(approval.note)}</p> : null}
       </div>
 
       {isPending ? (
-        <div className={cx("border-t border-stone-100", compact ? "px-4 py-3" : "px-5 py-3.5")}>
+        <div className={cx("border-t border-zinc-100 bg-zinc-50/70", pad, compact ? "py-3" : "py-4")}>
           {pending ? (
-            <div className="space-y-2.5">
-              <label htmlFor={noteId} className="block text-sm font-medium text-stone-700">
+            <div className="space-y-3">
+              <label htmlFor={noteId} className="block text-[13px] font-medium text-zinc-700">
                 Note (optional)
               </label>
               <textarea
@@ -142,10 +154,10 @@ export function ApprovalCard({
                 rows={2}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-600"
+                className="w-full rounded-lg bg-white px-3 py-2 text-sm shadow-xs ring-1 ring-zinc-950/10 ring-inset placeholder:text-zinc-400 focus:ring-2 focus:ring-accent-500 focus:outline-none"
                 placeholder="e.g. Verified with the courier"
               />
-              <p className="text-sm text-stone-700">
+              <p className="text-[13px] text-zinc-700">
                 {pending === "approve"
                   ? `Approve a ${formatIdr(approval.amount_idr)} refund? The agent will execute the (simulated) refund and notify the customer.`
                   : "Reject this refund? The agent will apologise to the customer and escalate to staff."}
@@ -164,13 +176,16 @@ export function ApprovalCard({
               </div>
             </div>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button variant="primary" onClick={() => setPending("approve")} aria-label={`Approve refund ${approval.approval_id}`}>
-                ✓ Approve
+                <IconCheck />
+                Approve
               </Button>
               <Button variant="danger" onClick={() => setPending("reject")} aria-label={`Reject refund ${approval.approval_id}`}>
-                ✕ Reject
+                <IconX />
+                Reject
               </Button>
+              {!compact ? <span className="ml-auto text-xs text-zinc-500">The agent resumes as soon as you decide.</span> : null}
             </div>
           )}
         </div>
@@ -180,10 +195,12 @@ export function ApprovalCard({
         <p
           role="status"
           className={cx(
-            "border-t px-5 py-2.5 text-sm",
-            result.kind === "ok" && "border-emerald-100 bg-emerald-50 text-emerald-900",
-            result.kind === "conflict" && "border-amber-100 bg-amber-50 text-amber-900",
-            result.kind === "error" && "border-red-100 bg-red-50 text-red-800",
+            "border-t text-[13px]",
+            pad,
+            "py-2.5",
+            result.kind === "ok" && "border-success-100 bg-success-50 text-success-800",
+            result.kind === "conflict" && "border-warning-100 bg-warning-50 text-warning-800",
+            result.kind === "error" && "border-danger-100 bg-danger-50 text-danger-800",
           )}
         >
           {result.text}
