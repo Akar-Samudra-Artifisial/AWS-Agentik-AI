@@ -63,13 +63,14 @@ Jangan katakan WhatsApp/SMS sudah berjalan.
 |---|---|
 | Repo publik + lisensi open source (`LICENSE`, MIT) | Sudah |
 | Diagram arsitektur (`docs/architecture.md`) | Sudah |
-| README Inggris + instruksi setup | Sudah (cek ulang bagian "Real AWS messaging" + catatan simulated) |
-| Deskripsi proyek (masalah, solusi, arsitektur, dampak, yang dibangun saat hackathon) | Belum |
+| README Inggris + instruksi setup | Sudah (status kanal jujur, Live demo, Evidence, Submission) |
+| Deskripsi proyek (masalah, solusi, arsitektur, dampak) | Sudah (`README.md`) |
+| Bukti (case JSON, screenshot dashboard, eval RAG) → `docs/evidence/` | Sudah |
 | Video demo ~3 menit (naskah ini) | Belum direkam |
-| Tautan solusi: `https://dhv2ziygcntil.cloudfront.net` + instruksi mencoba | Sudah deploy; instruksi akses juri belum final |
-| **ACE Opportunity ID** dengan kode kampanye "AWS CDS Agentic AI Hackathon -Sept. 2026" | **BELUM — harus dibuat user di AWS Partner Central** |
-| Screenshot email SES di inbox → `docs/evidence/` | Belum (user) |
-| Cek tidak ada secret/PII di riwayat git, `.env` tidak ter-commit | Belum diverifikasi |
-| Penjelasan WhatsApp (kategori WhatsApp) | Tidak berlaku — WhatsApp belum aktif, jangan daftar kategori ini |
+| Tautan solusi: `https://dhv2ziygcntil.cloudfront.net` + instruksi mencoba | Sudah (README → Live demo) |
+| **ACE Opportunity ID** dengan kode kampanye "AWS CDS Agentic AI Hackathon -Sept. 2026" | **BELUM — harus dibuat user di AWS Partner Central** (README: `TBD`) |
+| Screenshot email SES di inbox → `docs/evidence/scenario-{a,b,c}-email.png` | Sudah |
+| Cek tidak ada secret/PII di riwayat git, `.env` tidak ter-commit | Sebagian — `git log -p` grep `AKIA…`/`aws_secret_access_key`: 0 match (27 Okt); PII belum dicek |
+| Penjelasan WhatsApp (kategori WhatsApp) | Inbound terverifikasi, outbound diblok Meta `131031` — jangan klaim WhatsApp berjalan penuh |
 | Submit paling lambat Rabu 28 Okt 22.00 WITA | Belum |
 | Setelah submit: pantau biaya | Belum |

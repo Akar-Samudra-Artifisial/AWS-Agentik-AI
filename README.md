@@ -4,7 +4,47 @@
 
 Built for the *AWS CDS Agentic AI Hackathon (Sept. 2026)*. License: [MIT](LICENSE).
 
-> **Project status (honest):** all components are implemented and tested **offline**: unit/integration tests with moto, botocore Stubber, and a fake model; `make synth` produces 5 CloudFormation stacks; the dashboard builds as a static export. **Nothing has been deployed to or verified on AWS yet.** Real Bedrock calls, real message delivery, and the AgentCore deployment are still pending AWS credentials and account-level approvals. See [`docs/STATUS.md`](docs/STATUS.md) for the live status.
+> **Project status (honest):** deployed and verified on AWS in `us-east-1`. All 5 CDK stacks (`resolveai-dev-{data,messaging,knowledge,web,compute}`) are in `CREATE/UPDATE_COMPLETE`. The Strands agent runs on **Amazon Bedrock AgentCore Runtime** with `us.anthropic.claude-sonnet-4-5-20250929-v1:0` (inference profile). Scenarios A, B (approve and reject) and C were run end to end on 27 Oct 2026 with **real email replies via Amazon SES**. WhatsApp inbound is verified; WhatsApp outbound is blocked by Meta (see below). Payments and courier are **simulated**. See [`docs/STATUS.md`](docs/STATUS.md).
+
+| Channel | Status |
+|---|---|
+| **Email (Amazon SES)** | **Verified.** Real replies delivered via SES (sandbox, verified identity). Inbound is injected via `POST /api/simulate/inbound` and labelled "SIMULATED INBOUND" in the dashboard. |
+| **WhatsApp (End User Messaging Social)** | **Inbound verified; outbound blocked pending Meta business verification.** WABA and number registered; real inbound SNS events are received and parsed; delivery-status webhooks (sent/delivered/read/failed) are tracked in the dashboard. Outbound sends fail with Meta error `131031 Business Account locked`. |
+| **SMS (End User Messaging SMS)** | **Not verified.** Adapter implemented; no origination identity configured. |
+
+## Live demo
+
+- **Dashboard:** https://dhv2ziygcntil.cloudfront.net (static Next.js on S3 + CloudFront with OAC; a CloudFront Function handles deep links).
+- **API:** `https://3sr2wztr8f.execute-api.us-east-1.amazonaws.com/api` (requires `x-api-key`; `/api/health` is public). The demo API key is embedded in the dashboard bundle (demo only, see Limitations).
+- Try it: open **Simulator** in the dashboard, send a preset complaint, then watch the case, agent timeline and approvals.
+
+## Evidence
+
+| What | File |
+|---|---|
+| Scenario A (late delivery, redelivery) `CASE-20261027-44BF` → resolved | [`scenario-a-case.json`](docs/evidence/scenario-a-case.json), [`scenario-a-email.png`](docs/evidence/scenario-a-email.png) |
+| Scenario B approve (refund Rp349,000 simulated after staff approval) `CASE-20261027-1BB8` → resolved | [`scenario-b-approve-case.json`](docs/evidence/scenario-b-approve-case.json), [`scenario-b-email.png`](docs/evidence/scenario-b-email.png) |
+| Scenario B reject `CASE-20261027-5DAF` → escalated, no `execute_refund` | [`scenario-b-reject-case.json`](docs/evidence/scenario-b-reject-case.json) |
+| Scenario C (delivered-not-received + police threat) `CASE-20261027-FE0B` → escalated high | [`scenario-c-case.json`](docs/evidence/scenario-c-case.json), [`scenario-c-email.png`](docs/evidence/scenario-c-email.png) |
+| RAG retrieval eval: hit@4 15/16 = 93.8% | [`eval_rag.md`](docs/evidence/eval_rag.md) |
+| Dashboard screenshots | [`docs/evidence/screenshots/`](docs/evidence/screenshots/) (`01-overview.png` … `07-simulator.png`) |
+
+Gmail inbox screenshots have the recipient address blurred.
+
+![Dashboard overview](docs/evidence/screenshots/01-overview.png)
+![Scenario B case after staff approval](docs/evidence/screenshots/03-case-b-approve.png)
+![Scenario A email reply in Gmail](docs/evidence/scenario-a-email.png)
+
+## Submission
+
+| Item | Value |
+|---|---|
+| Repository | https://github.com/Akar-Samudra-Artifisial/AWS-Agentik-AI |
+| License | [MIT](LICENSE) |
+| Architecture diagram | [`docs/architecture.md`](docs/architecture.md) |
+| Demo video | TBD |
+| Live solution | https://dhv2ziygcntil.cloudfront.net |
+| ACE Opportunity ID | `TBD` |
 
 ---
 
@@ -63,7 +103,9 @@ In short: WhatsApp → End User Messaging Social → SNS → Lambda `dispatcher`
 
 ## How WhatsApp is used
 
-WhatsApp is the primary two-way channel. Customers complain in free text on WhatsApp; End User Messaging Social publishes the event to SNS, which triggers the dispatcher and the agent. The agent replies on WhatsApp with options, the customer answers ("1", "refund", …), and the final confirmation goes out on WhatsApp plus email. If WhatsApp delivery fails, the messaging layer falls back to SMS, then email (`packages/common/src/resolveai_common/messaging/dispatch.py`). The dashboard **Simulator** can inject the same inbound event without a phone, which is useful while the WABA is still in review.
+WhatsApp is the primary two-way channel. Customers complain in free text on WhatsApp; End User Messaging Social publishes the event to SNS, which triggers the dispatcher and the agent. The agent replies on WhatsApp with options, the customer answers ("1", "refund", …), and the final confirmation goes out on WhatsApp plus email. If WhatsApp delivery fails, the messaging layer falls back to SMS, then email (`packages/common/src/resolveai_common/messaging/dispatch.py`). The dashboard **Simulator** can inject the same inbound event without a phone.
+
+**Current state:** the WABA and phone number are registered, and real inbound WhatsApp events arrive through SNS and are parsed by the dispatcher (captured fixtures: `tests/fixtures/whatsapp_*.json`). Delivery-status webhooks (sent/delivered/read/failed) are tracked and shown in the dashboard. **Outbound WhatsApp is blocked**: Meta returns error `131031 Business Account locked` because Meta Business Verification of the portfolio is still pending. The verified demo therefore uses email (SES) for replies.
 
 ## Repository layout
 
@@ -156,8 +198,6 @@ Store the resulting runtime ARN in SSM as `/resolveai/dev/agent/runtime_arn`. Th
 
 ### 5. Ingest and evaluate the Knowledge Base
 
-> In progress: these scripts are being added and may not exist in your checkout yet.
-
 ```bash
 .venv/bin/python scripts/ingest_kb.py   # upload rag/policies to S3 + start ingestion job
 .venv/bin/python scripts/eval_rag.py    # retrieval hit@k over rag/eval/queries.yaml
@@ -200,7 +240,7 @@ make lint
 cd dashboard && npm run lint && npm run typecheck && npm run build
 ```
 
-Last recorded run (see `docs/STATUS.md`): `make test` → 179 passed, 9 skipped (Strands tests skip outside `agent/.venv`); agent suite in `agent/.venv` → 69 passed; `make lint` clean; `make synth` → 5 stacks.
+Last recorded run (see `docs/STATUS.md`): `make test` → 261 passed, 10 skipped (Strands tests skip outside `agent/.venv`); agent suite `tests/agent` → 77 passed; ruff clean.
 
 Manual smoke test of a real channel (sends **one real message** through the AWS SDK; requires credentials):
 
@@ -209,7 +249,7 @@ Manual smoke test of a real channel (sends **one real message** through the AWS 
 .venv/bin/python scripts/send_test_message.py --channel whatsapp --to <your E.164 number>
 ```
 
-In progress (being added in parallel, may not exist yet): `scripts/eval_agent.py` (Scenarios A/B/C against the agent), `scripts/e2e.py` and `make e2e` (end-to-end against the deployed stack; the current `make e2e` target is a placeholder), and `POST /api/demo/reset` to reset demo data.
+Also available: `scripts/eval_agent.py` (Scenarios A/B/C against the agent), `scripts/e2e.py` / `make e2e` (end-to-end against the deployed stack; use `--channel email`, the verified channel), and `POST /api/demo/reset` to reset demo data.
 
 ## Demo scenarios
 
@@ -237,7 +277,7 @@ The demo customer is the developer's own WhatsApp number/email from `DEMO_PHONE_
 - **`NEXT_PUBLIC_API_KEY` is visible in the dashboard bundle.** All `NEXT_PUBLIC_*` values are embedded in client JavaScript. This is acceptable for a hackathon demo only; production would use real user auth (e.g. Amazon Cognito).
 - **The dashboard has no login** and a single shared staff identity (`NEXT_PUBLIC_STAFF_NAME`).
 - **Single region, `us-east-1`**, single `dev` environment.
-- **Not yet verified on AWS** (see the status note at the top): real Bedrock calls, AgentCore deployment, KB retrieval quality, and real WhatsApp/SMS/SES delivery are pending. The inbound WhatsApp parser was written from AWS documentation and has not yet been checked against a real SNS payload.
+- **Channels:** only email (SES, sandbox) is verified end to end, with inbound simulated. WhatsApp outbound is blocked by Meta (`131031`) pending business verification; SMS has no origination identity configured.
 - Some IAM statements are still broad (messaging `Resource: *`, AgentCore `runtime/*`) and will be narrowed once ARNs are known.
 
 ## License
