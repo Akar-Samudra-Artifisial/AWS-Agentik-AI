@@ -12,6 +12,15 @@ INFRA_VENV := infra/.venv
 # CLI CDK dijalankan via npx (tanpa install global); `cd infra` agar cdk.json terbaca.
 CDK := cd infra && . .venv/bin/activate && npx --yes aws-cdk@2
 
+# Context deploy dari env/.env agar `make deploy` tidak menghapus env runtime Lambda.
+-include .env
+DEMO_RESET_ENABLED ?= true
+DEPLOY_CONTEXT := -c demo_reset_enabled=$(DEMO_RESET_ENABLED) \
+	$(if $(SES_FROM_EMAIL),-c ses_from_email=$(SES_FROM_EMAIL)) \
+	$(if $(SMS_ORIGINATION_IDENTITY),-c sms_origination_identity=$(SMS_ORIGINATION_IDENTITY)) \
+	$(if $(WA_PHONE_NUMBER_ID),-c wa_phone_number_id=$(WA_PHONE_NUMBER_ID)) \
+	$(if $(WA_META_API_VERSION),-c wa_meta_api_version=$(WA_META_API_VERSION))
+
 .PHONY: install infra-install test lint build-lambda build-agent synth bootstrap deploy \
 	destroy seed e2e ingest-kb eval-rag eval-agent dashboard-dev clean
 
@@ -49,7 +58,7 @@ bootstrap:
 	$(CDK) bootstrap
 
 deploy: build-lambda
-	$(CDK) deploy --all --require-approval never
+	$(CDK) deploy --all --require-approval never $(DEPLOY_CONTEXT)
 
 destroy:
 	$(CDK) destroy --all --force
