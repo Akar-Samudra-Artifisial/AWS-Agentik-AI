@@ -1,0 +1,6 @@
+# Agent runtime (AgentCore container / Lambda fallback). resolveai_common is vendored
+# into agent/_vendor/ by scripts/build_agent.sh. Versions verified in agent/.venv.
+strands-agents==1.62.0
+bedrock-agentcore==1.25.0
+boto3==1.43.119
+pydantic==2.14.1

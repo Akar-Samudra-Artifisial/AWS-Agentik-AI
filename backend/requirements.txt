@@ -1,0 +1,5 @@
+# Runtime deps for the backend Lambdas (api + dispatcher).
+# Install from the repo root: pip install -r backend/requirements.txt
+fastapi>=0.115,<1
+mangum>=0.19,<1
+./packages/common

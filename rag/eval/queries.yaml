@@ -1,0 +1,36 @@
+# Set evaluasi retrieval RAG — digunakan oleh scripts/eval_rag.py (hit@4).
+# Setiap entri: pertanyaan pelanggan + dokumen sumber yang diharapkan muncul di hasil retrieval.
+# Dasar: docs/prd/04-rag.md §6.
+queries:
+  - question: "Pesanan saya terlambat 2 hari, kompensasi apa yang bisa saya dapat?"
+    expected_source: shipping-delay-policy
+  - question: "Berapa nilai voucher maksimal untuk keterlambatan?"
+    expected_source: shipping-delay-policy
+  - question: "Pesanan saya baru terlambat 1 hari, apa yang akan dilakukan?"
+    expected_source: shipping-delay-policy
+  - question: "Kapan sebuah paket dianggap hilang?"
+    expected_source: lost-package-policy
+  - question: "Paket saya tidak ada update tracking berhari-hari, apa pilihan saya?"
+    expected_source: lost-package-policy
+  - question: "Refund sebesar Rp349.000 apakah perlu persetujuan staf?"
+    expected_source: refund-policy
+  - question: "Berapa lama dana refund kembali ke saya?"
+    expected_source: refund-policy
+  - question: "Refund Rp80.000 apakah bisa diproses otomatis?"
+    expected_source: refund-policy
+  - question: "Pelanggan mengancam akan melapor ke polisi, apa yang harus dilakukan?"
+    expected_source: escalation-policy
+  - question: "Status pesanan sudah delivered tapi saya belum menerima barangnya."
+    expected_source: escalation-policy
+  - question: "Jam operasional staf dari jam berapa sampai jam berapa?"
+    expected_source: escalation-policy
+  - question: "Apakah saya bisa mengubah alamat setelah pesanan dikirim?"
+    expected_source: address-change-policy
+  - question: "Bagaimana cara menjawab pelanggan yang sedang marah?"
+    expected_source: communication-guidelines
+  - question: "Bolehkah asisten menjanjikan refund pasti kepada pelanggan?"
+    expected_source: communication-guidelines
+  - question: "Apa arti status out_for_delivery pada tracking?"
+    expected_source: faq-courier
+  - question: "Apa bedanya status in_transit dan delivered?"
+    expected_source: faq-courier
