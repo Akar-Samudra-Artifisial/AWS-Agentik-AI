@@ -1,15 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { ApprovalCard } from "@/components/ApprovalCard";
 import { BarChartCard, type BarDatum } from "@/components/BarChartCard";
 import { CHANNEL_COLOR } from "@/components/ChannelBadge";
 import { CaseTable } from "@/components/CaseTable";
 import { KpiCard } from "@/components/KpiCard";
-import { Card, CardHeader, EmptyState, ErrorState, LoadingRows, PageHeader } from "@/components/ui";
+import { Card, EmptyState, ErrorState, LoadingRows, MoreLink, PageHeader, SectionHeading } from "@/components/ui";
 import type { CaseCategory, Channel } from "@/lib/api-types";
-import { errorMessage, useApprovals, useCases, useMetrics } from "@/lib/api";
-import { CATEGORY_LABEL, CHANNEL_LABEL, formatDuration } from "@/lib/format";
+import { POLL_MS, errorMessage, useApprovals, useCases, useMetrics } from "@/lib/api";
+import { CATEGORY_LABEL, CHANNEL_LABEL, formatDuration, formatNumber } from "@/lib/format";
 
 const CHANNELS: Channel[] = ["whatsapp", "sms", "email"];
 const CATEGORY_COLOR = "#1f6f86";
@@ -34,54 +33,83 @@ export default function OverviewPage() {
     color: CATEGORY_COLOR,
   }));
   const pendingN = m?.totals.pending_approvals ?? approvals.data?.length ?? 0;
+  const closed = m ? m.totals.resolved + m.totals.escalated : 0;
 
   return (
     <>
-      <PageHeader title="Overview" description="Ringkasan kinerja agen dan antrean yang butuh keputusan staf. Data diperbarui tiap 3 detik." />
+      <PageHeader
+        title="Overview"
+        description={`How the AI agent is performing and what needs a staff decision. Auto-refreshes every ${POLL_MS / 1000} seconds.`}
+      />
 
-      {metrics.error ? <ErrorState message={errorMessage(metrics.error)} onRetry={() => metrics.mutate()} /> : null}
+      {metrics.error ? (
+        <Card className="mb-6">
+          <ErrorState message={errorMessage(metrics.error)} onRetry={() => metrics.mutate()} />
+        </Card>
+      ) : null}
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <KpiCard label="Total kasus" value={m?.totals.cases ?? "—"} loading={mLoading} />
+      <section aria-label="Key metrics" className="grid grid-cols-2 gap-4 md:grid-cols-3 2xl:grid-cols-6">
         <KpiCard
-          label="Auto-resolved"
+          label="Total cases"
+          value={m ? formatNumber(m.totals.cases) : "—"}
+          hint={m ? `${formatNumber(m.totals.active)} active · ${formatNumber(m.totals.resolved)} resolved` : undefined}
+          loading={mLoading}
+        />
+        <KpiCard
+          label="Auto-resolution rate"
           value={m ? `${Math.round((m.auto_resolution_rate ?? 0) * 100)}%` : "—"}
-          hint="dari kasus selesai/eskalasi"
+          hint={m ? `Resolved without staff, of ${formatNumber(closed)} closed cases` : undefined}
           tone="accent"
           loading={mLoading}
         />
         <KpiCard
-          label="Respons pertama (p50)"
+          label="First response · p50"
           value={formatDuration(m?.first_response_ms.p50)}
-          hint={m?.first_response_ms.p90 != null ? `p90 ${formatDuration(m.first_response_ms.p90)}` : undefined}
+          hint={m?.first_response_ms.p90 != null ? `p90 ${formatDuration(m.first_response_ms.p90)} · inbound → first reply` : undefined}
           loading={mLoading}
         />
-        <KpiCard label="Eskalasi" value={m?.totals.escalated ?? "—"} loading={mLoading} />
-        <KpiCard label="Approval pending" value={m ? pendingN : "—"} tone={pendingN > 0 ? "warning" : "default"} loading={mLoading} />
-        <KpiCard label="Kasus aktif" value={m?.totals.active ?? "—"} loading={mLoading} />
-      </div>
+        <KpiCard
+          label="Time to resolve · p50"
+          value={formatDuration(m?.resolution_ms.p50)}
+          hint="First message → case closed"
+          loading={mLoading}
+        />
+        <KpiCard
+          label="Escalated"
+          value={m ? formatNumber(m.totals.escalated) : "—"}
+          unit={m ? (m.totals.escalated === 1 ? "case" : "cases") : undefined}
+          hint="Handed off to a human agent"
+          tone={m && m.totals.escalated > 0 ? "danger" : "default"}
+          loading={mLoading}
+        />
+        <KpiCard
+          label="Pending approvals"
+          value={m ? formatNumber(pendingN) : "—"}
+          hint="Refunds above the auto-approval limit"
+          tone={pendingN > 0 ? "warning" : "default"}
+          loading={mLoading}
+        />
+      </section>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-3">
-        <section aria-labelledby="pending-title" className="xl:order-last">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 id="pending-title" className="text-[15px] font-semibold text-stone-900">
-              Approval pending
-            </h2>
-            <Link href="/approvals/" className="text-sm font-medium text-brand-700 hover:underline">
-              Semua →
-            </Link>
-          </div>
+      <div className="mt-8 grid gap-6 xl:grid-cols-3">
+        <section aria-labelledby="pending-title" className="min-w-0">
+          <SectionHeading
+            id="pending-title"
+            title="Needs your decision"
+            count={approvals.data?.length}
+            action={<MoreLink href="/approvals/">All approvals</MoreLink>}
+          />
           {approvals.error ? (
             <Card>
-              <ErrorState message={errorMessage(approvals.error)} />
+              <ErrorState message={errorMessage(approvals.error)} onRetry={() => approvals.mutate()} />
             </Card>
           ) : !approvals.data ? (
             <Card>
-              <LoadingRows rows={2} />
+              <LoadingRows rows={2} label="Loading approvals…" />
             </Card>
           ) : approvals.data.length === 0 ? (
             <Card>
-              <EmptyState title="Tidak ada approval pending" hint="Refund di atas batas akan muncul di sini." />
+              <EmptyState title="All clear" hint="Refunds above the auto-approval limit will appear here." />
             </Card>
           ) : (
             <div className="space-y-3">
@@ -91,31 +119,27 @@ export default function OverviewPage() {
             </div>
           )}
         </section>
-        <div className="grid gap-6 md:grid-cols-2 xl:col-span-2">
-          <BarChartCard title="Kasus per kanal" data={byChannel} loading={mLoading} />
-          <BarChartCard title="Kasus per kategori" data={byCategory} loading={mLoading} />
-        </div>
+
+        <section aria-labelledby="recent-title" className="min-w-0 xl:col-span-2">
+          <SectionHeading id="recent-title" title="Recent activity" action={<MoreLink href="/cases/">All cases</MoreLink>} />
+          <Card>
+            {cases.error ? (
+              <ErrorState message={errorMessage(cases.error)} onRetry={() => cases.mutate()} />
+            ) : !cases.data ? (
+              <LoadingRows rows={5} label="Loading cases…" />
+            ) : cases.data.length === 0 ? (
+              <EmptyState title="No cases yet" hint="Send a message from the Simulator to get started." />
+            ) : (
+              <CaseTable cases={cases.data.slice(0, 8)} dense />
+            )}
+          </Card>
+        </section>
       </div>
 
-      <Card className="mt-6">
-        <CardHeader
-          title="Kasus terbaru"
-          action={
-            <Link href="/cases/" className="text-sm font-medium text-brand-700 hover:underline">
-              Lihat semua →
-            </Link>
-          }
-        />
-        {cases.error ? (
-          <ErrorState message={errorMessage(cases.error)} onRetry={() => cases.mutate()} />
-        ) : !cases.data ? (
-          <LoadingRows rows={5} />
-        ) : cases.data.length === 0 ? (
-          <EmptyState title="Belum ada kasus" hint="Kirim pesan dari Simulator untuk memulai." />
-        ) : (
-          <CaseTable cases={cases.data.slice(0, 8)} dense />
-        )}
-      </Card>
+      <section aria-label="Case breakdown" className="mt-8 grid gap-6 md:grid-cols-2">
+        <BarChartCard title="Cases by channel" data={byChannel} loading={mLoading} />
+        <BarChartCard title="Cases by category" data={byCategory} loading={mLoading} />
+      </section>
     </>
   );
 }

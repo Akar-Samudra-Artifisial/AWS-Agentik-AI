@@ -5,11 +5,12 @@ import { type FormEvent, useEffect, useId, useState } from "react";
 import { caseHref } from "@/components/CaseTable";
 import { ChannelBadge } from "@/components/ChannelBadge";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Button, Card, CardHeader, PageHeader, SimulatedTag, cx } from "@/components/ui";
+import { Button, Card, CardHeader, EmptyState, PageHeader, SectionHeading, SimulatedTag, cx } from "@/components/ui";
 import type { CaseSummary, Channel } from "@/lib/api-types";
 import { DEMO_CUSTOMER_NAME, DEMO_PHONE_E164, errorMessage, fetchCases, resetDemo, simulateInbound, useCase } from "@/lib/api";
-import { CHANNEL_LABEL } from "@/lib/format";
+import { CHANNEL_LABEL, plural } from "@/lib/format";
 import { maskPhone } from "@/lib/mask";
+import { PRESET_MESSAGES } from "@/lib/presets";
 
 interface Preset {
   id: string;
@@ -18,25 +19,25 @@ interface Preset {
   steps: string[];
 }
 
-// Teks dari docs/prd/00-overview.md §7 (skenario A/B/C).
+// Teks pesan pelanggan ada di `@/lib/presets` (belum diterjemahkan, menunggu keputusan).
 const PRESETS: Preset[] = [
   {
     id: "A",
-    title: "A · Terlambat 2 hari",
-    expect: "get_order → search_policy → 3 opsi; balas “1” → resolved (auto)",
-    steps: ["Pesanan ORD-1001 saya terlambat 2 hari.", "1"],
+    title: "A · Delivery 2 days late",
+    expect: "get_order → search_policy → 3 options; reply “1” → resolved automatically",
+    steps: [...PRESET_MESSAGES.A],
   },
   {
     id: "B",
-    title: "B · Paket hilang, refund besar",
-    expect: "Rp349.000 > batas → approval pending → Approve/Reject di dashboard",
-    steps: ["ORD-1002 belum sampai juga, sudah seminggu.", "Saya pilih refund saja."],
+    title: "B · Lost package, large refund",
+    expect: "Rp349,000 > auto-limit → pending approval → Approve/Reject on the dashboard",
+    steps: [...PRESET_MESSAGES.B],
   },
   {
     id: "C",
-    title: "C · Delivered tapi tidak diterima",
-    expect: "Ancaman hukum → escalate_to_human (prioritas tinggi)",
-    steps: ["ORD-1003 katanya sudah diterima tapi saya tidak terima apa-apa. Saya akan lapor polisi!"],
+    title: "C · Marked delivered, never received",
+    expect: "Legal threat → escalate_to_human (high priority)",
+    steps: [...PRESET_MESSAGES.C],
   },
 ];
 
@@ -82,30 +83,30 @@ export default function SimulatorPage() {
     <>
       <PageHeader
         title="Simulator"
-        description="Picu pesan masuk tanpa ponsel. Pesan diproses agen yang sama; balasan agen dikirim lewat kanal nyata ke kontak pelanggan."
-        action={<SimulatedTag label="inbound simulated" />}
+        description="Trigger an inbound customer message without a phone. It is handled by the same production agent, and replies go out over the real channel to the customer’s contact."
+        action={<SimulatedTag label="Simulated inbound" title="Inbound messages are injected from this page; agent replies are real" />}
       />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Card>
-          <CardHeader title="Pesan masuk" />
+          <CardHeader title="Inbound message" subtitle="Compose a message as if the customer sent it." />
           <form onSubmit={send} className="space-y-5 px-5 py-5">
             <fieldset>
-              <legend className="mb-2 text-sm font-medium text-stone-700">Pelanggan</legend>
+              <legend className="mb-2 text-sm font-medium text-stone-700">Customer</legend>
               <div className="flex flex-wrap gap-2">
                 <RadioPill
                   name="customer"
                   checked={customer === "demo"}
                   disabled={!DEMO_PHONE_E164}
                   onChange={() => setCustomer("demo")}
-                  label={DEMO_PHONE_E164 ? `${DEMO_CUSTOMER_NAME} · ${maskPhone(DEMO_PHONE_E164)}` : "Demo (NEXT_PUBLIC_DEMO_PHONE_E164 kosong)"}
+                  label={DEMO_PHONE_E164 ? `${DEMO_CUSTOMER_NAME} · ${maskPhone(DEMO_PHONE_E164)}` : "Demo (NEXT_PUBLIC_DEMO_PHONE_E164 not set)"}
                 />
-                <RadioPill name="customer" checked={customer === "custom"} onChange={() => setCustomer("custom")} label="Nomor lain" />
+                <RadioPill name="customer" checked={customer === "custom"} onChange={() => setCustomer("custom")} label="Other number" />
               </div>
               {customer === "custom" ? (
                 <div className="mt-3">
                   <label htmlFor={ids.phone} className="mb-1 block text-xs font-medium text-stone-600">
-                    Nomor E.164 (data sintetis)
+                    E.164 phone number (synthetic data only)
                   </label>
                   <input
                     id={ids.phone}
@@ -118,14 +119,14 @@ export default function SimulatorPage() {
                     className="w-64 rounded-lg border border-stone-300 px-3 py-2 font-mono text-sm focus:border-brand-600 aria-invalid:border-red-500"
                   />
                   <p id={`${ids.phone}-hint`} className="mt-1 text-xs text-stone-500">
-                    Nomor tak dikenal akan dibuat sebagai “Pelanggan baru” tanpa pesanan.
+                    Unknown numbers are created as a new customer with no orders.
                   </p>
                 </div>
               ) : null}
             </fieldset>
 
             <fieldset>
-              <legend className="mb-2 text-sm font-medium text-stone-700">Kanal</legend>
+              <legend className="mb-2 text-sm font-medium text-stone-700">Channel</legend>
               <div className="flex flex-wrap gap-2">
                 {CHANNELS.map((c) => (
                   <RadioPill key={c} name="channel" checked={channel === c} onChange={() => setChannel(c)} label={CHANNEL_LABEL[c]} />
@@ -135,7 +136,7 @@ export default function SimulatorPage() {
 
             <div>
               <label htmlFor={ids.text} className="mb-1 block text-sm font-medium text-stone-700">
-                Isi pesan
+                Message
               </label>
               <textarea
                 id={ids.text}
@@ -145,30 +146,30 @@ export default function SimulatorPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void send();
                 }}
-                placeholder="Tulis pesan pelanggan atau pilih preset…"
+                placeholder="Type a customer message or pick a preset…"
                 className="w-full rounded-lg border border-stone-300 px-3 py-2 text-[15px] focus:border-brand-600"
               />
             </div>
 
             {error ? (
               <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-                Gagal mengirim: {error}
+                Couldn’t send: {error}
               </p>
             ) : null}
 
             <div className="flex flex-wrap items-center gap-3">
               <Button type="submit" variant="primary" loading={sending} disabled={!canSend}>
-                Kirim pesan
+                Send message
               </Button>
-              <span className="text-xs text-stone-500">⌘/Ctrl + Enter</span>
-              {!phoneValid ? <span className="text-xs text-amber-700">Pilih pelanggan dengan nomor E.164 yang valid.</span> : null}
+              <span className="text-xs text-stone-500">or press ⌘/Ctrl + Enter</span>
+              {!phoneValid ? <span className="text-xs text-amber-700">Choose a customer with a valid E.164 number.</span> : null}
             </div>
           </form>
         </Card>
 
         <div className="space-y-4">
           <Card>
-            <CardHeader title="Preset skenario" subtitle="Isi otomatis teks; kirim langkah berikutnya setelah agen membalas." />
+            <CardHeader title="Scenario presets" subtitle="Fills in the message. Send the next step after the agent replies." />
             <ul className="divide-y divide-stone-100">
               {PRESETS.map((p) => (
                 <li key={p.id} className="px-5 py-3.5">
@@ -183,7 +184,7 @@ export default function SimulatorPage() {
                         className="max-w-full truncate rounded-md border border-stone-300 bg-stone-50 px-2.5 py-1 text-left text-xs text-stone-700 hover:border-brand-600 hover:bg-brand-50"
                         title={s}
                       >
-                        <span className="font-semibold">Langkah {i + 1}:</span> {s}
+                        <span className="font-semibold">Step {i + 1}:</span> {s}
                       </button>
                     ))}
                   </div>
@@ -196,9 +197,11 @@ export default function SimulatorPage() {
       </div>
 
       <section aria-labelledby="sent-h" className="mt-8">
-        <h2 id="sent-h" className="mb-3 text-[15px] font-semibold text-stone-900">Terkirim di sesi ini</h2>
+        <SectionHeading id="sent-h" title="Sent this session" count={sent.length} />
         {sent.length === 0 ? (
-          <p className="text-sm text-stone-500">Belum ada pesan yang dikirim.</p>
+          <Card>
+            <EmptyState title="Nothing sent yet" hint="Messages you send here will be tracked until their case appears." />
+          </Card>
         ) : (
           <ul className="space-y-3">
             {sent.map((s) => (
@@ -217,14 +220,14 @@ function ResetDemoCard({ onReset }: { onReset: () => void }) {
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
 
   async function reset() {
-    if (!window.confirm("Reset data demo? Semua kasus non-seed beserta pesan, timeline, dan approval-nya akan dihapus.")) return;
+    if (!window.confirm("Reset demo data? All non-seed cases and their messages, timelines and approvals will be deleted.")) return;
     setBusy(true);
     setStatus(null);
     try {
       const res = await resetDemo();
       setStatus({
         ok: true,
-        text: `Dihapus ${res.deleted.cases} kasus, ${res.deleted.messages} pesan, ${res.deleted.approvals} approval; pesanan ${res.reset_orders.join(", ")} direset.`,
+        text: `Deleted ${plural(res.deleted.cases, "case")}, ${plural(res.deleted.messages, "message")}, ${plural(res.deleted.approvals, "approval")}; orders ${res.reset_orders.join(", ")} restored.`,
       });
       onReset();
     } catch (err) {
@@ -236,7 +239,7 @@ function ResetDemoCard({ onReset }: { onReset: () => void }) {
 
   return (
     <Card>
-      <CardHeader title="Reset demo" subtitle="Kembalikan data ke kondisi awal sebelum take rekaman berikutnya." />
+      <CardHeader title="Reset demo" subtitle="Restore seed data before the next recording take." />
       <div className="space-y-3 px-5 py-4">
         <Button variant="danger" loading={busy} onClick={() => void reset()}>
           Reset demo
@@ -323,13 +326,13 @@ function SentItem({ sent }: { sent: Sent }) {
         <>
           {status ? <StatusBadge status={status} /> : null}
           <Link href={caseHref(caseId)} className="font-mono text-sm font-medium text-brand-700 hover:underline">
-            Buka {caseId} →
+            Open {caseId} →
           </Link>
         </>
       ) : timedOut ? (
-        <span className="text-sm text-amber-700">Kasus belum muncul. Cek halaman Kasus.</span>
+        <span className="text-sm text-amber-700">Case hasn’t appeared yet. Check the Cases page.</span>
       ) : (
-        <span role="status" className="text-sm text-stone-500">Menunggu kasus terbentuk…</span>
+        <span role="status" className="text-sm text-stone-500">Waiting for the case to be created…</span>
       )}
     </li>
   );

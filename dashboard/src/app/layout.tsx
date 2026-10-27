@@ -4,13 +4,13 @@ import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ResolveAI — Konsol Supervisor",
-  description: "Pemantauan agen AI pemulihan keluhan pelanggan.",
+  title: "ResolveAI — Supervisor Console",
+  description: "Monitoring console for the ResolveAI customer-complaint recovery agent.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="id">
+    <html lang="en">
       <body>
         <AppShell>{children}</AppShell>
       </body>

@@ -1,7 +1,7 @@
 "use client";
 
 import { ApprovalCard } from "@/components/ApprovalCard";
-import { Card, EmptyState, ErrorState, LoadingRows, PageHeader } from "@/components/ui";
+import { Card, EmptyState, ErrorState, LoadingRows, PageHeader, SectionHeading } from "@/components/ui";
 import { errorMessage, useApprovals } from "@/lib/api";
 
 export default function ApprovalsPage() {
@@ -27,25 +27,23 @@ export default function ApprovalsPage() {
   return (
     <>
       <PageHeader
-        title="Approval"
-        description="Refund di atas batas otomatis membutuhkan keputusan staf. Agen melanjutkan kasus setelah Anda memutuskan."
+        title="Approvals"
+        description="Refunds above the auto-approval limit need a staff decision. The agent can’t pay out without one — it resumes the case as soon as you decide."
       />
 
       <section aria-labelledby="pending-h">
-        <h2 id="pending-h" className="mb-3 text-[15px] font-semibold text-stone-900">
-          Menunggu keputusan {pending.data ? <span className="text-stone-500">({pending.data.length})</span> : null}
-        </h2>
+        <SectionHeading id="pending-h" title="Awaiting decision" count={pending.data?.length} />
         {pending.error ? (
           <Card>
             <ErrorState message={errorMessage(pending.error)} onRetry={() => pending.mutate()} />
           </Card>
         ) : !pending.data ? (
           <Card>
-            <LoadingRows rows={3} label="Memuat approval…" />
+            <LoadingRows rows={3} label="Loading approvals…" />
           </Card>
         ) : pending.data.length === 0 ? (
           <Card>
-            <EmptyState title="Antrean kosong" hint="Tidak ada refund yang menunggu persetujuan." />
+            <EmptyState title="Queue is empty" hint="No refunds are waiting for approval." />
           </Card>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
@@ -57,18 +55,18 @@ export default function ApprovalsPage() {
       </section>
 
       <section aria-labelledby="history-h" className="mt-10">
-        <h2 id="history-h" className="mb-3 text-[15px] font-semibold text-stone-900">Riwayat</h2>
+        <SectionHeading id="history-h" title="Decision history" count={historyLoaded ? history.length : undefined} />
         {historyError ? (
           <Card>
             <ErrorState message={errorMessage(historyError)} onRetry={refreshHistory} />
           </Card>
         ) : !historyLoaded ? (
           <Card>
-            <LoadingRows rows={3} />
+            <LoadingRows rows={3} label="Loading history…" />
           </Card>
         ) : history.length === 0 ? (
           <Card>
-            <EmptyState title="Belum ada riwayat keputusan" />
+            <EmptyState title="No decisions yet" hint="Approved and rejected refunds will be listed here." />
           </Card>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
