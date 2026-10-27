@@ -73,6 +73,10 @@ class ToolContext:
     clock: Callable[[], datetime] = utc_now
     tool_calls: int = 0
     outbound: int = 0
+    # Messages that actually reached the customer this turn (any tool).
+    delivered: int = 0
+    # Channel the customer wrote in on this turn; defaults replies to it (else case.channel).
+    inbound_channel: Channel | None = None
     auto_escalated: bool = False
     _seq: int = field(default=0, repr=False)
 
