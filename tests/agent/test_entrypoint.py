@@ -305,6 +305,21 @@ def test_build_agent_wires_prompt_and_tools(
     assert set(agent.tool_names) == set(TOOL_NAMES)
 
 
+def test_build_agent_runs_tools_sequentially(
+    ctx: ToolContext, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Parallel update_case + escalate_to_human must not clobber the case status."""
+    pytest.importorskip("strands")
+    from strands.tools.executors import SequentialToolExecutor
+
+    from agent.agent_factory import build_agent, build_model
+
+    monkeypatch.setenv("BEDROCK_MODEL_ID", "test.model-id-v1")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+    agent = build_agent(ctx, [], model=build_model())
+    assert isinstance(agent.tool_executor, SequentialToolExecutor)
+
+
 def test_run_turn_through_strands_event_loop(ctx: ToolContext) -> None:
     """A scripted fake model drives the real Strands loop: tool use, then final text."""
     pytest.importorskip("strands")

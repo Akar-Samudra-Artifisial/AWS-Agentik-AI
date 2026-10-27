@@ -16,6 +16,7 @@ from typing import Any, get_type_hints
 from strands import Agent, tool
 from strands.models import BedrockModel
 from strands.tools.decorator import DecoratedFunctionTool
+from strands.tools.executors import SequentialToolExecutor
 
 from .config import get_param
 from .context import ToolContext
@@ -102,4 +103,7 @@ def build_agent(
         tools=build_strands_tools(ctx, actions),
         system_prompt=load_system_prompt(),
         callback_handler=None,
+        # Tools read-modify-write the case and share per-turn counters on ``ctx``;
+        # running them concurrently lets e.g. update_case overwrite "escalated".
+        tool_executor=SequentialToolExecutor(),
     )
