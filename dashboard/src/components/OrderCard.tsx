@@ -1,7 +1,20 @@
 import type { Customer, Order } from "@/lib/api-types";
 import { CHANNEL_LABEL, ORDER_STATUS_LABEL, formatDateTime, formatIdr, labelOf } from "@/lib/format";
 import { maskEmail, maskPhone } from "@/lib/mask";
+import type { OrderStatus } from "@/lib/api-types";
+import { IconPackage, IconUser } from "./icons";
+import { Badge, type Tone } from "./StatusBadge";
 import { Card, CardHeader, Field, SimulatedTag } from "./ui";
+
+const ORDER_TONE: Record<OrderStatus, Tone> = {
+  processing: "neutral",
+  shipped: "info",
+  in_transit: "info",
+  out_for_delivery: "info",
+  delivered: "success",
+  cancelled: "neutral",
+  refunded: "accent",
+};
 
 const DAY_MS = 86_400_000;
 
@@ -33,8 +46,8 @@ export function OrderCard({ order }: { order: Order | null | undefined }) {
   if (!order) {
     return (
       <Card>
-        <CardHeader title="Order" />
-        <p className="px-5 py-4 text-sm text-stone-500">This case isn’t linked to an order yet.</p>
+        <CardHeader icon={<IconPackage />} title="Order" />
+        <p className="px-5 py-4 text-[13px] text-zinc-500">This case isn’t linked to an order yet.</p>
       </Card>
     );
   }
@@ -46,23 +59,23 @@ export function OrderCard({ order }: { order: Order | null | undefined }) {
   const sinceScan = daysSince(order.last_scan_at);
   return (
     <Card>
-      <CardHeader title="Order" action={<SimulatedTag label="Simulated courier" />} />
-      <dl className="divide-y divide-stone-100 px-5 py-2">
-        <Field label="ID" value={<span className="font-mono">{order.order_id}</span>} />
-        <Field label="Status" value={labelOf(ORDER_STATUS_LABEL, order.status)} />
-        <Field label="Order value" value={formatIdr(order.total_idr)} />
+      <CardHeader icon={<IconPackage />} title="Order" subtitle={order.courier ?? undefined} action={<SimulatedTag label="Simulated courier" />} />
+      <dl className="divide-y divide-zinc-100 px-5 py-1">
+        <Field label="ID" value={<span className="font-mono text-[12.5px]">{order.order_id}</span>} />
+        <Field label="Status" value={<Badge tone={ORDER_TONE[order.status] ?? "neutral"}>{labelOf(ORDER_STATUS_LABEL, order.status)}</Badge>} />
+        <Field label="Order value" value={<span className="tabular-nums">{formatIdr(order.total_idr)}</span>} />
         <Field label="ETA" value={formatDateTime(order.eta)} />
         <Field
           label="Delay"
           value={
             late == null ? (
-              <span className="text-stone-500">—</span>
+              <span className="text-zinc-400">—</span>
             ) : late > 0 ? (
-              <span className="rounded bg-red-50 px-1.5 text-red-800">
+              <span className="rounded-md bg-danger-50 px-1.5 py-px text-danger-800 ring-1 ring-danger-200 ring-inset">
                 {late} {late === 1 ? "day" : "days"} late{order.status === "refunded" ? " (at refund)" : ""}
               </span>
             ) : (
-              <span className="text-stone-600">On time</span>
+              <span className="text-success-700">On time</span>
             )
           }
         />
@@ -91,19 +104,19 @@ export function OrderCard({ order }: { order: Order | null | undefined }) {
 export function CustomerCard({ customer }: { customer: Customer | null | undefined }) {
   return (
     <Card>
-      <CardHeader title="Customer" />
+      <CardHeader icon={<IconUser />} title="Customer" subtitle="Contact details masked" />
       {customer ? (
-        <dl className="divide-y divide-stone-100 px-5 py-2">
+        <dl className="divide-y divide-zinc-100 px-5 py-1">
           <Field label="Name" value={customer.name} />
-          <Field label="ID" value={<span className="font-mono">{customer.customer_id}</span>} />
-          <Field label="Phone" value={<span className="font-mono">{maskPhone(customer.phone_e164)}</span>} />
-          <Field label="Email" value={<span className="font-mono">{maskEmail(customer.email)}</span>} />
+          <Field label="ID" value={<span className="font-mono text-[12.5px]">{customer.customer_id}</span>} />
+          <Field label="Phone" value={<span className="font-mono text-[12.5px]">{maskPhone(customer.phone_e164)}</span>} />
+          <Field label="Email" value={<span className="font-mono text-[12.5px]">{maskEmail(customer.email)}</span>} />
           {customer.preferred_channel ? (
             <Field label="Preferred channel" value={CHANNEL_LABEL[customer.preferred_channel]} />
           ) : null}
         </dl>
       ) : (
-        <p className="px-5 py-4 text-sm text-stone-500">Customer details unavailable.</p>
+        <p className="px-5 py-4 text-[13px] text-zinc-500">Customer details unavailable.</p>
       )}
     </Card>
   );

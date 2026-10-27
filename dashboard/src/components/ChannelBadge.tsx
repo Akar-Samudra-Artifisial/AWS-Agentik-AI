@@ -1,35 +1,26 @@
+import type { ReactNode } from "react";
 import type { Channel } from "@/lib/api-types";
 import { CHANNEL_LABEL } from "@/lib/format";
+import { IconMail, IconPhone, IconWhatsApp } from "./icons";
 import { cx } from "./ui";
 
-const STYLE: Record<Channel, string> = {
-  whatsapp: "bg-wa-50 text-wa-700 ring-wa-600/25",
-  sms: "bg-sms-50 text-sms-700 ring-sms-600/25",
-  email: "bg-mail-50 text-mail-700 ring-mail-600/25",
-};
-
-const DOT: Record<Channel, string> = {
-  whatsapp: "bg-wa-600",
-  sms: "bg-sms-600",
-  email: "bg-mail-600",
-};
-
-export const CHANNEL_COLOR: Record<Channel, string> = {
-  whatsapp: "#16a34a",
-  sms: "#2563eb",
-  email: "#6b6489",
+/** Kanal dibedakan lewat ikon + label (netral), agar warna tetap milik status dan aksen. */
+export const CHANNEL_ICON: Record<Channel, (p: { className?: string }) => ReactNode> = {
+  whatsapp: IconWhatsApp,
+  sms: IconPhone,
+  email: IconMail,
 };
 
 export function ChannelBadge({ channel, size = "md" }: { channel: Channel; size?: "sm" | "md" }) {
+  const Icon = CHANNEL_ICON[channel];
   return (
     <span
       className={cx(
-        "inline-flex items-center gap-1.5 rounded-full font-medium ring-1 ring-inset whitespace-nowrap",
-        size === "sm" ? "px-2 py-px text-[11px]" : "px-2.5 py-0.5 text-xs",
-        STYLE[channel] ?? "bg-stone-100 text-stone-700 ring-stone-300",
+        "inline-flex items-center gap-1.5 rounded-md bg-white font-medium text-zinc-700 ring-1 ring-zinc-950/10 ring-inset whitespace-nowrap",
+        size === "sm" ? "px-1.5 py-px text-[11px]" : "px-2 py-0.5 text-xs",
       )}
     >
-      <span aria-hidden="true" className={cx("size-1.5 rounded-full", DOT[channel] ?? "bg-stone-500")} />
+      {Icon ? <Icon className={cx("text-zinc-500", size === "sm" ? "size-3" : "size-3.5")} /> : null}
       {CHANNEL_LABEL[channel] ?? channel}
     </span>
   );

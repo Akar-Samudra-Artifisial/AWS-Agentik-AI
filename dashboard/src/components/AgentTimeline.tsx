@@ -1,9 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { AgentEvent, AgentEventType } from "@/lib/api-types";
 import { formatDateTime, formatDuration, formatTime } from "@/lib/format";
 import { maskText } from "@/lib/mask";
+import {
+  IconAlert,
+  IconBolt,
+  IconChat,
+  IconChevronRight,
+  IconDoc,
+  IconEdit,
+  IconPackage,
+  IconSearch,
+  IconSparkle,
+  IconTicket,
+  IconTruck,
+  IconUser,
+  IconWallet,
+  IconX,
+} from "./icons";
+import { Badge } from "./StatusBadge";
 import { EmptyState, SimulatedTag, cx } from "./ui";
 
 const TYPE_LABEL: Record<AgentEventType, string> = {
@@ -28,6 +45,32 @@ const TOOL_DESCRIPTION: Record<string, string> = {
   execute_refund: "Execute an approved refund",
   escalate_to_human: "Escalate to a human agent",
 };
+
+type IconComp = (p: { className?: string }) => ReactNode;
+
+/** Ikon per tool agar langkah mudah dipindai. */
+const TOOL_ICON: Record<string, IconComp> = {
+  get_order: IconPackage,
+  find_orders_by_customer: IconUser,
+  search_policy: IconSearch,
+  update_case: IconEdit,
+  send_message: IconChat,
+  send_resolution_notice: IconChat,
+  create_voucher: IconTicket,
+  schedule_redelivery: IconTruck,
+  request_refund: IconWallet,
+  execute_refund: IconWallet,
+  escalate_to_human: IconAlert,
+};
+
+function stepIcon(e: AgentEvent): IconComp {
+  if (e.ok === false || e.type === "error") return IconX;
+  const byTool = e.tool ? TOOL_ICON[e.tool] : undefined;
+  if (byTool) return byTool;
+  if (e.type === "escalation") return IconAlert;
+  if (e.type === "model_message") return IconSparkle;
+  return IconBolt;
+}
 
 const SIMULATED_TOOLS = new Set(["execute_refund", "request_refund", "schedule_redelivery"]);
 
@@ -115,66 +158,82 @@ export function AgentTimeline({ events }: { events: AgentEvent[] }) {
   }
 
   return (
-    <ol className="relative space-y-1 px-5 py-4" aria-label="Agent timeline">
+    <ol className="px-5 py-5" aria-label="Agent timeline">
       {sorted.map((e, i) => {
         const key = eventKey(e, i);
         const failed = e.ok === false || e.type === "error";
         const sources = e.tool === "search_policy" ? extractSources(e.output) : [];
         const detail = e.type === "tool_call" ? e.input : (e.output ?? e.input);
+        const Icon = stepIcon(e);
+        const last = i === sorted.length - 1;
+        const tone = failed ? "danger" : e.type === "escalation" ? "warning" : e.type === "tool_result" ? "success" : "accent";
         return (
-          <li key={key} className={cx("relative rounded-lg pl-7", fresh.has(key) && "animate-highlight")}>
-            <span
-              aria-hidden="true"
-              className={cx(
-                "absolute top-3 left-1.5 size-2.5 rounded-full ring-4 ring-white",
-                failed ? "bg-red-600" : e.type === "escalation" ? "bg-amber-500" : "bg-brand-600",
-              )}
-            />
-            {i < sorted.length - 1 ? (
-              <span aria-hidden="true" className="absolute top-6 bottom-[-6px] left-[10px] w-px bg-stone-200" />
-            ) : null}
-            <details className="group rounded-lg px-2 py-2 hover:bg-stone-50">
+          <li key={key} className={cx("relative flex gap-3.5 rounded-lg", !last && "pb-2", fresh.has(key) && "animate-highlight")}>
+            {/* Rel vertikal + node ikon per langkah. */}
+            <div className="relative flex w-8 shrink-0 flex-col items-center">
+              <span
+                aria-hidden="true"
+                className={cx(
+                  "relative z-10 mt-1.5 grid size-8 place-items-center rounded-full ring-1 ring-inset [&>svg]:size-4",
+                  tone === "danger" && "bg-danger-50 text-danger-600 ring-danger-200",
+                  tone === "warning" && "bg-warning-50 text-warning-700 ring-warning-200",
+                  tone === "success" && "bg-success-50 text-success-700 ring-success-200",
+                  tone === "accent" && "bg-accent-50 text-accent-600 ring-accent-200",
+                )}
+              >
+                <Icon />
+              </span>
+              {!last ? <span aria-hidden="true" className="absolute top-10 -bottom-1.5 w-px bg-zinc-200" /> : null}
+            </div>
+            <details className="group min-w-0 flex-1 rounded-lg px-3 py-2 transition-colors hover:bg-zinc-50 open:bg-zinc-50">
               {/* Ringkasan + sumber kebijakan selalu terlihat; JSON lengkap muncul saat dibuka. */}
-              <summary className="block cursor-pointer list-none rounded">
+              <summary className="block cursor-pointer list-none rounded [&::-webkit-details-marker]:hidden">
                 <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="font-mono text-sm font-semibold text-stone-900">{e.tool ?? TYPE_LABEL[e.type] ?? e.type}</span>
+                  <span className="font-mono text-[13px] font-semibold text-zinc-900">{e.tool ?? TYPE_LABEL[e.type] ?? e.type}</span>
                   {/* Hanya hasil tool/error yang punya status; tool_call tanpa hasil ditampilkan netral. */}
                   {failed ? (
-                    <span className="rounded bg-red-100 px-1.5 py-px text-[11px] font-semibold text-red-800">✕ Failed</span>
+                    <Badge tone="danger">Failed</Badge>
                   ) : e.type === "tool_result" ? (
-                    <span className="rounded bg-emerald-50 px-1.5 py-px text-[11px] font-semibold text-emerald-800">✓ OK</span>
+                    <Badge tone="success">OK</Badge>
                   ) : e.type === "tool_call" ? (
-                    <span className="rounded bg-stone-100 px-1.5 py-px text-[11px] font-semibold text-stone-600">→ Called</span>
+                    <Badge tone="neutral" dot={false}>Called</Badge>
+                  ) : e.type === "escalation" ? (
+                    <Badge tone="warning">Escalation</Badge>
                   ) : null}
                   {e.tool && SIMULATED_TOOLS.has(e.tool) ? <SimulatedTag /> : null}
-                  <span className="ml-auto flex items-center gap-2 text-xs tabular-nums text-stone-500">
-                    {e.latency_ms != null ? <span title="Latency">{formatDuration(e.latency_ms)}</span> : null}
+                  <span className="ml-auto flex items-center gap-2.5 font-mono text-[11.5px] tabular-nums text-zinc-400">
+                    {e.latency_ms != null ? (
+                      <span title="Latency" className="rounded bg-zinc-100 px-1.5 py-px text-zinc-600">
+                        {formatDuration(e.latency_ms)}
+                      </span>
+                    ) : null}
                     <time dateTime={e.ts} title={formatDateTime(e.ts)}>{formatTime(e.ts)}</time>
-                    <span aria-hidden="true" className="inline-block transition-transform group-open:rotate-90">
-                      ›
-                    </span>
+                    <IconChevronRight aria-hidden="true" className="size-3.5 text-zinc-400 transition-transform group-open:rotate-90" />
                   </span>
                 </span>
-                <span className="mt-0.5 block text-xs font-medium text-stone-500">
+                <span className="mt-0.5 block text-xs text-zinc-500">
                   {TYPE_LABEL[e.type] ?? e.type}
                   {e.tool && TOOL_DESCRIPTION[e.tool] ? ` · ${TOOL_DESCRIPTION[e.tool]}` : ""}
                 </span>
                 {/* Hasil tool sukses biasanya "ok=true, …" (noise); isinya tetap ada di JSON saat dibuka. */}
                 {(e.type !== "tool_result" || failed) && summarize(detail) ? (
-                  <span className="mt-1 block text-[13px] leading-snug text-stone-600">{summarize(detail)}</span>
+                  <span className="mt-1.5 block font-mono text-[12px] leading-snug break-words text-zinc-600">{summarize(detail)}</span>
                 ) : null}
                 {sources.length ? (
-                  <span className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
-                    <span className="font-medium text-stone-600">Policy sources:</span>
-                    {sources.map((s) => (
-                      <span key={s} className="rounded bg-brand-50 px-1.5 py-0.5 font-mono text-brand-700 ring-1 ring-brand-100">
-                        {s}
+                  <span className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className="inline-flex items-center gap-1 font-medium text-zinc-600">
+                      <IconDoc className="size-3.5 text-accent-600" />
+                      Policy sources
+                    </span>
+                    {sources.map((src) => (
+                      <span key={src} className="rounded-md bg-accent-50 px-1.5 py-0.5 font-mono text-[11.5px] text-accent-800 ring-1 ring-accent-200 ring-inset">
+                        {src}
                       </span>
                     ))}
                   </span>
                 ) : null}
               </summary>
-              <div className="mt-2 grid gap-2 lg:grid-cols-2">
+              <div className="mt-3 grid gap-3 lg:grid-cols-2">
                 {e.input != null ? <JsonBlock title="Input" value={e.input} /> : null}
                 {e.output != null ? <JsonBlock title="Output" value={e.output} /> : null}
               </div>
@@ -189,8 +248,8 @@ export function AgentTimeline({ events }: { events: AgentEvent[] }) {
 function JsonBlock({ title, value }: { title: string; value: unknown }) {
   return (
     <div>
-      <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-stone-500">{title}</p>
-      <pre className="max-h-64 overflow-auto rounded-md bg-stone-900 p-3 font-mono text-xs leading-relaxed text-stone-100">
+      <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{title}</p>
+      <pre className="max-h-64 overflow-auto rounded-lg bg-zinc-950 p-3 font-mono text-[11.5px] leading-relaxed text-zinc-100 ring-1 ring-zinc-800">
         {pretty(value)}
       </pre>
     </div>
