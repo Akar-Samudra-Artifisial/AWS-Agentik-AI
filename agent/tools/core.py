@@ -43,6 +43,7 @@ __all__ = [
     "load_case",
     "load_customer",
     "load_owned_order",
+    "reply_channel",
     "update_case_fields",
 ]
 
@@ -105,6 +106,11 @@ def update_case_fields(ctx: ToolContext, **updates: Any) -> Case:
     updated = case.model_copy(update={**updates, "updated_at": ctx.now_iso()})
     ctx.repos.cases.put(updated)
     return updated
+
+
+def reply_channel(ctx: ToolContext, case: Case) -> Channel:
+    """Channel to answer on: where the customer wrote in this turn, else the case channel."""
+    return ctx.inbound_channel or case.channel
 
 
 def fallback_chain(start: Channel, exclude: Sequence[Channel] = ()) -> list[Channel]:
@@ -175,6 +181,7 @@ def deliver(
             Attempt(channel, result.ok, result.provider_message_id, result.error)
         )
         if result.ok:
+            ctx.delivered += 1
             if load_case(ctx).first_response_at is None:
                 update_case_fields(ctx, first_response_at=ts)
             break
@@ -224,7 +231,11 @@ def escalate_case(
         customer = load_customer(ctx, case)
         text = _escalation_text(customer, on_duty)
         attempts = deliver(
-            ctx, case, customer, fallback_chain(case.channel), lambda _: Rendered(text)
+            ctx,
+            case,
+            customer,
+            fallback_chain(reply_channel(ctx, case)),
+            lambda _: Rendered(text),
         )
         notified = any(a.ok for a in attempts)
     return {

@@ -8,16 +8,18 @@ fail-safe (``02-backend.md`` §7).
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Callable
 from typing import Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 from resolveai_common.logging import get_logger
-from resolveai_common.models import AgentEventType
+from resolveai_common.models import AgentEventType, Channel
 
 from .config import get_optional_param
 from .context import ToolContext
-from .tools.base import record_event, to_json
+from .tools.base import ToolError, fail, record_event, to_json
+from .tools.messaging import send_message
 from .tools.policy_search import BedrockKnowledgeBaseRetriever
 
 __all__ = [
@@ -30,6 +32,19 @@ __all__ = [
 ]
 
 HISTORY_LIMIT = 20
+REPLY_FALLBACK = "reply_fallback"
+REPLY_NUDGE = (
+    "Kamu belum membalas pelanggan pada giliran ini. Kirim balasan sekarang via "
+    "send_message (atau send_resolution_notice bila kasus sudah selesai)."
+)
+REPLY_FALLBACK_ID = (
+    "Terima kasih, pesan Anda sudah kami terima dan sedang kami proses. "
+    "Kami akan segera mengabari Anda."
+)
+REPLY_FALLBACK_EN = (
+    "Thank you, we have received your message and are working on it. "
+    "We will update you shortly."
+)
 _LENIENT = ConfigDict(extra="ignore")
 
 
@@ -155,6 +170,54 @@ def _default_agent_builder(
     return build_agent(ctx, actions)
 
 
+def _send_reply_fallback(
+    ctx: ToolContext, actions: list[dict[str, Any]], language: str
+) -> bool:
+    """Send the fixed holding reply through the ``send_message`` path; log ``reply_fallback``."""
+    text = REPLY_FALLBACK_EN if language == "en" else REPLY_FALLBACK_ID
+    record_event(
+        ctx,
+        AgentEventType.TOOL_CALL,
+        tool=REPLY_FALLBACK,
+        input_text=to_json({"body": text}),
+    )
+    try:
+        # Unwrapped: the fallback must not count against the model's tool-call budget.
+        result = inspect.unwrap(send_message)(ctx, body=text)
+    except ToolError as exc:
+        result = fail(exc.code, exc.message)
+    sent = bool(result.get("ok"))
+    record_event(
+        ctx,
+        AgentEventType.TOOL_RESULT,
+        tool=REPLY_FALLBACK,
+        output_text=to_json(result),
+        success=sent,
+    )
+    actions.append({"tool": REPLY_FALLBACK, "ok": sent})
+    return sent
+
+
+def _ensure_reply(
+    ctx: ToolContext,
+    agent: TurnAgent,
+    result: Any,
+    actions: list[dict[str, Any]],
+    payload: InvocationPayload,
+    log: Any,
+) -> Any:
+    """Every customer message gets a reply: one nudge, then a deterministic fallback."""
+    if ctx.delivered:
+        return result
+    log.warning("agent did not reply; nudging")
+    result = agent(REPLY_NUDGE)
+    if ctx.delivered:
+        return result
+    sent = _send_reply_fallback(ctx, actions, payload.customer.language)
+    log.warning("agent still silent; reply fallback", extra={"sent": sent})
+    return result
+
+
 def _response(
     case_id: str | None,
     actions: list[dict[str, Any]],
@@ -198,8 +261,12 @@ def run_turn(
         ctx = context_factory(payload.case_id)
         if ctx.repos.cases.get(payload.case_id) is None:
             return _response(payload.case_id, actions, error="case_not_found")
+        if payload.event_type == "customer_message" and payload.channel in set(Channel):
+            ctx.inbound_channel = Channel(payload.channel)
         agent = agent_builder(ctx, actions)
         result = agent(build_prompt(payload))
+        if payload.event_type == "customer_message":
+            result = _ensure_reply(ctx, agent, result, actions, payload, log)
         record_event(
             ctx, AgentEventType.MODEL_MESSAGE, output_text=to_json(str(result).strip())
         )

@@ -14,7 +14,14 @@ import pytest
 from _agent_support import CUSTOMER_EMAIL, CUSTOMER_PHONE
 
 from agent.context import ToolContext
-from agent.runner import InvocationPayload, build_prompt, run_turn
+from agent.runner import (
+    REPLY_FALLBACK,
+    REPLY_FALLBACK_ID,
+    REPLY_NUDGE,
+    InvocationPayload,
+    build_prompt,
+    run_turn,
+)
 from agent.tools import TOOL_NAMES, build_tools
 
 RECIPIENT_PARAMS = {
@@ -73,6 +80,8 @@ class StubAgent:
             status="awaiting_customer", category="late_delivery"
         )
         self.actions.append({"tool": "update_case", "ok": bool(result["ok"])})
+        result = self.tools["send_message"](body="1. Jadwal ulang 2. Voucher")
+        self.actions.append({"tool": "send_message", "ok": bool(result["ok"])})
         return "opsi ditawarkan"
 
 
@@ -96,9 +105,14 @@ def test_customer_message_returns_contract_shape(ctx: ToolContext) -> None:
         "case_id": "CASE-1",
         "case_status": "awaiting_customer",
         "category": "late_delivery",
-        "actions": [{"tool": "update_case", "ok": True}],
+        "actions": [
+            {"tool": "update_case", "ok": True},
+            {"tool": "send_message", "ok": True},
+        ],
         "error": None,
     }
+    # The agent replied, so there is no nudge prompt.
+    assert len(built[0].prompts) == 1
     prompt = built[0].prompts[0]
     assert (
         "<pesan_pelanggan>\nPesanan ORD-LATE belum sampai\n</pesan_pelanggan>" in prompt
@@ -186,6 +200,115 @@ def test_model_message_event_recorded(ctx: ToolContext) -> None:
     events = ctx.repos.agent_events.list_for_case("CASE-1")
     assert events[-1].type.value == "model_message"
     assert "opsi ditawarkan" in (events[-1].output or "")
+
+
+class SilentAgent(StubAgent):
+    """Investigates but never replies; replies on the nudge only if ``obey_nudge``."""
+
+    obey_nudge = False
+
+    def __call__(self, prompt: str) -> str:
+        self.prompts.append(prompt)
+        if prompt == REPLY_NUDGE:
+            if self.obey_nudge:
+                result = self.tools["send_message"](body="Pesanan Anda sedang dicek.")
+                self.actions.append({"tool": "send_message", "ok": bool(result["ok"])})
+            return "nudge diproses"
+        result = self.tools["get_order"](order_id="ORD-LATE")
+        self.actions.append({"tool": "get_order", "ok": bool(result["ok"])})
+        return "sudah dicek"
+
+
+class ObedientAgent(SilentAgent):
+    obey_nudge = True
+
+
+def _fallback_events(ctx: ToolContext) -> list[Any]:
+    return [
+        e
+        for e in ctx.repos.agent_events.list_for_case("CASE-1")
+        if e.tool == REPLY_FALLBACK
+    ]
+
+
+def test_silent_agent_is_nudged_and_replies(ctx: ToolContext, sender: Any) -> None:
+    response, built = _run(ctx, _payload(), ObedientAgent)
+
+    assert built[0].prompts[1] == REPLY_NUDGE
+    assert len(built[0].prompts) == 2
+    assert [c["text"] for c in sender.calls] == ["Pesanan Anda sedang dicek."]
+    assert response["actions"] == [
+        {"tool": "get_order", "ok": True},
+        {"tool": "send_message", "ok": True},
+    ]
+    assert _fallback_events(ctx) == []
+
+
+def test_still_silent_agent_gets_fallback_once(ctx: ToolContext, sender: Any) -> None:
+    response, built = _run(ctx, _payload(), SilentAgent)
+
+    assert len(built[0].prompts) == 2
+    assert [c["text"] for c in sender.calls] == [REPLY_FALLBACK_ID]
+    assert sender.calls[0]["channel"].value == "whatsapp"
+    assert sender.calls[0]["to_e164"] == CUSTOMER_PHONE
+    assert response["actions"][-1] == {"tool": REPLY_FALLBACK, "ok": True}
+    assert [e.type.value for e in _fallback_events(ctx)] == ["tool_call", "tool_result"]
+    events = ctx.repos.agent_events.list_for_case("CASE-1")
+    assert events[-1].type.value == "model_message"
+    outbound = [
+        m
+        for m in ctx.repos.messages.list_for_case("CASE-1")
+        if m.direction.value == "outbound"
+    ]
+    assert [m.delivery_status.value for m in outbound] == ["sent"]
+
+
+@pytest.mark.parametrize("agent_cls", [ObedientAgent, SilentAgent])
+def test_reply_goes_to_inbound_channel(
+    ctx: ToolContext, sender: Any, agent_cls: Any
+) -> None:
+    """CASE-1 is a WhatsApp case; a follow-up by email is answered by email."""
+    _run(ctx, _payload(channel="email"), agent_cls)
+
+    assert [c["channel"].value for c in sender.calls] == ["email"]
+    assert sender.calls[0]["to_email"] == CUSTOMER_EMAIL
+
+
+def test_fallback_respects_outbound_budget(ctx: ToolContext, sender: Any) -> None:
+    from resolveai_common import policy
+
+    class BudgetSpent(SilentAgent):
+        def __call__(self, prompt: str) -> str:
+            ctx.outbound = policy.MAX_OUTBOUND_PER_TURN
+            return super().__call__(prompt)
+
+    response, _ = _run(ctx, _payload(), BudgetSpent)
+
+    assert sender.calls == []
+    assert response["actions"][-1] == {"tool": REPLY_FALLBACK, "ok": False}
+    assert response["error"] is None
+
+
+def test_replying_agent_gets_no_nudge_or_fallback(
+    ctx: ToolContext, sender: Any
+) -> None:
+    _, built = _run(ctx, _payload())
+
+    assert built[0].prompts[1:] == []
+    assert len(sender.calls) == 1
+    assert _fallback_events(ctx) == []
+
+
+def test_approval_decided_is_not_nudged(ctx: ToolContext, sender: Any) -> None:
+    raw = _payload(
+        event_type="approval_decided",
+        message=None,
+        approval={"approval_id": "APR-1", "status": "approved", "note": ""},
+    )
+    _, built = _run(ctx, raw, SilentAgent)
+
+    assert len(built[0].prompts) == 1
+    assert sender.calls == []
 
 
 def test_lambda_handler_accepts_direct_and_body(
@@ -320,8 +443,9 @@ def test_build_agent_runs_tools_sequentially(
     assert isinstance(agent.tool_executor, SequentialToolExecutor)
 
 
-def test_run_turn_through_strands_event_loop(ctx: ToolContext) -> None:
-    """A scripted fake model drives the real Strands loop: tool use, then final text."""
+def test_run_turn_through_strands_event_loop(ctx: ToolContext, sender: Any) -> None:
+    """A scripted fake model drives the real Strands loop: tool use, final text without a
+    reply, then (after the nudge) send_message and a final text."""
     pytest.importorskip("strands")
     import json
 
@@ -353,14 +477,20 @@ def test_run_turn_through_strands_event_loop(ctx: ToolContext) -> None:
             self.calls += 1
             self.system_prompts.append(system_prompt)
             yield {"messageStart": {"role": "assistant"}}
-            if self.calls == 1:
-                tool_input = {
-                    "status": "awaiting_customer",
-                    "category": "late_delivery",
-                }
+            if self.calls in (1, 3):
+                name, tool_input = (
+                    (
+                        "update_case",
+                        {"status": "awaiting_customer", "category": "late_delivery"},
+                    )
+                    if self.calls == 1
+                    else ("send_message", {"body": "1. Jadwal ulang 2. Voucher"})
+                )
                 yield {
                     "contentBlockStart": {
-                        "start": {"toolUse": {"toolUseId": "t1", "name": "update_case"}}
+                        "start": {
+                            "toolUse": {"toolUseId": f"t{self.calls}", "name": name}
+                        }
                     }
                 }
                 yield {
@@ -384,8 +514,13 @@ def test_run_turn_through_strands_event_loop(ctx: ToolContext) -> None:
     assert response["error"] is None
     assert response["case_status"] == "awaiting_customer"
     assert response["category"] == "late_delivery"
-    assert response["actions"] == [{"tool": "update_case", "ok": True}]
-    assert model.calls == 2
+    assert response["actions"] == [
+        {"tool": "update_case", "ok": True},
+        {"tool": "send_message", "ok": True},
+    ]
+    assert model.calls == 4
+    assert [c["text"] for c in sender.calls] == ["1. Jadwal ulang 2. Voucher"]
+    assert _fallback_events(ctx) == []
     assert (model.system_prompts[0] or "").startswith("Kamu adalah ResolveAI")
 
 

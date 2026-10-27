@@ -25,6 +25,7 @@ from .core import (
     fallback_chain,
     load_case,
     load_customer,
+    reply_channel,
 )
 from .registry import auto_escalate, logged_tool
 
@@ -71,7 +72,7 @@ def send_message(
         raise ToolError.from_violation(violation)
     case = load_case(ctx)
     customer = load_customer(ctx, case)
-    start = Channel(channel) if channel else case.channel
+    start = Channel(channel) if channel else reply_channel(ctx, case)
     if start is Channel.EMAIL and not customer.email:
         raise ToolError("no_email", "pelanggan tidak punya email; pakai kanal lain")
     _reserve_outbound(ctx)
@@ -149,10 +150,9 @@ def send_resolution_notice(
         email = render_email(**params)
         return Rendered(email.text, subject=email.subject, html=email.html)
 
-    with_email = customer.email is not None and case.channel is not Channel.EMAIL
-    chains = [
-        fallback_chain(case.channel, exclude=[Channel.EMAIL] if with_email else [])
-    ]
+    start = reply_channel(ctx, case)
+    with_email = customer.email is not None and start is not Channel.EMAIL
+    chains = [fallback_chain(start, exclude=[Channel.EMAIL] if with_email else [])]
     if with_email:
         chains.append([Channel.EMAIL])
 
