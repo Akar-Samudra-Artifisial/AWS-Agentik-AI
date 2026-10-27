@@ -1,0 +1,551 @@
+{
+  "case": {
+    "case_id": "CASE-20261027-7089",
+    "customer_id": "CUST-0001",
+    "order_id": "ORD-1002",
+    "channel": "email",
+    "status": "escalated",
+    "category": "lost_package",
+    "priority": "normal",
+    "resolution_type": "escalated",
+    "resolution": null,
+    "summary": "Pelanggan pilih refund penuh Rp349.000 untuk ORD-1002 (paket hilang 6 hari tanpa update tracking). Refund pending approval APR-966E763234.",
+    "first_inbound_at": "2026-10-27T09:08:52Z",
+    "first_response_at": "2026-10-27T09:09:09.004385Z",
+    "resolved_at": null,
+    "created_at": "2026-10-27T09:08:52Z",
+    "updated_at": "2026-10-27T09:09:39Z",
+    "lock_until": null,
+    "seeded": false
+  },
+  "customer": {
+    "customer_id": "CUST-0001",
+    "name": "Rani",
+    "phone_e164": "+62877****348",
+    "email": "l***@gmail.com",
+    "language": "id",
+    "preferred_channel": "whatsapp",
+    "created_at": "2026-07-29T08:23:37Z"
+  },
+  "order": {
+    "order_id": "ORD-1002",
+    "customer_id": "CUST-0001",
+    "status": "in_transit",
+    "items": [
+      {
+        "name": "Jaket hujan",
+        "qty": 1,
+        "price_idr": 349000
+      }
+    ],
+    "total_idr": 349000,
+    "courier": "NusaExpress",
+    "tracking_number": "NX100288",
+    "shipped_at": "2026-10-19T09:08:52Z",
+    "eta": "2026-10-23T09:08:52Z",
+    "last_scan_at": "2026-10-21T09:08:52Z",
+    "last_scan_location": "Hub Bandung",
+    "tracking_events": [
+      {
+        "ts": "2026-10-19T09:08:52Z",
+        "location": "Gudang Jakarta",
+        "desc": "Paket diserahkan ke kurir"
+      },
+      {
+        "ts": "2026-10-21T09:08:52Z",
+        "location": "Hub Bandung",
+        "desc": "Paket transit"
+      }
+    ],
+    "redelivery_at": null,
+    "refund": {
+      "status": "pending",
+      "amount_idr": 349000,
+      "at": "2026-10-27T09:09:20.630357Z"
+    },
+    "created_at": "2026-10-18T09:08:52Z"
+  },
+  "messages": [
+    {
+      "case_id": "CASE-20261027-7089",
+      "msg_id": "5b125aeab8dc4340a400489586ce5414",
+      "ts": "2026-10-27T09:08:52Z",
+      "direction": "inbound",
+      "author": "customer",
+      "channel": "email",
+      "body": "Paket ORD-1002 saya tidak ada update tracking hampir seminggu, sepertinya hilang.",
+      "provider_message_id": null,
+      "delivery_status": "delivered",
+      "error": null,
+      "simulated": true,
+      "created_at": "2026-10-27T09:08:52Z"
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "msg_id": "MSG-10ddc6194208",
+      "ts": "2026-10-27T09:09:09.004385Z",
+      "direction": "outbound",
+      "author": "agent",
+      "channel": "email",
+      "body": "Halo Kak Rani, terima kasih sudah menghubungi kami. Saya cek pesanan ORD-1002 memang tidak ada update tracking sejak 21 Oktober di Hub Bandung, sudah 6 hari. Paket ini kami kategorikan hilang. Kakak bisa pilih: 1) Refund penuh Rp349.000, atau 2) Kirim ulang barang yang sama (selama stok tersedia). Mana yang Kakak pilih?",
+      "provider_message_id": "010001a17c9edea4-a1f02eb0-52f7-48df-ae15-8c116578400d-000000",
+      "delivery_status": "sent",
+      "error": null,
+      "simulated": false,
+      "created_at": "2026-10-27T09:09:09.004385Z"
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "msg_id": "93b4e04a7b0f4edcab62fc2bf7bce5a3",
+      "ts": "2026-10-27T09:09:14Z",
+      "direction": "inbound",
+      "author": "customer",
+      "channel": "email",
+      "body": "Saya pilih refund saja.",
+      "provider_message_id": null,
+      "delivery_status": "delivered",
+      "error": null,
+      "simulated": true,
+      "created_at": "2026-10-27T09:09:14Z"
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "msg_id": "MSG-3bbc645659dc",
+      "ts": "2026-10-27T09:09:24.906946Z",
+      "direction": "outbound",
+      "author": "agent",
+      "channel": "email",
+      "body": "Baik Kak Rani, permintaan refund Rp349.000 untuk pesanan ORD-1002 sedang diverifikasi oleh tim kami. Kami akan kabari secepatnya setelah proses verifikasi selesai. Terima kasih atas kesabarannya.",
+      "provider_message_id": "010001a17c9f1cbc-37e076d7-56b9-4ee9-9256-874c51b6b7ef-000000",
+      "delivery_status": "sent",
+      "error": null,
+      "simulated": false,
+      "created_at": "2026-10-27T09:09:24.906946Z"
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "msg_id": "MSG-d3ebd67e85ed",
+      "ts": "2026-10-27T09:09:36.674914Z",
+      "direction": "outbound",
+      "author": "agent",
+      "channel": "email",
+      "body": "Halo Kak Rani, mohon maaf atas ketidaknyamanannya. Setelah verifikasi lebih lanjut, permintaan refund untuk pesanan ORD-1002 belum dapat kami proses saat ini. Tim kami akan menghubungi Kakak segera untuk penjelasan lebih detail dan solusi terbaik.",
+      "provider_message_id": "010001a17c9f4ab5-b3c3bae2-9940-4df9-8dc0-4912cfeae320-000000",
+      "delivery_status": "sent",
+      "error": null,
+      "simulated": false,
+      "created_at": "2026-10-27T09:09:36.674914Z"
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "msg_id": "MSG-13056fb3004f",
+      "ts": "2026-10-27T09:09:36.716087Z",
+      "direction": "outbound",
+      "author": "agent",
+      "channel": "email",
+      "body": "Terima kasih atas kesabaran Anda. Kasus Anda sudah kami teruskan ke tim kami dan staf akan menghubungi Anda segera.",
+      "provider_message_id": "010001a17c9f4ae6-388fd7d1-a9ea-45a8-82ed-25f0d2ff832e-000000",
+      "delivery_status": "sent",
+      "error": null,
+      "simulated": false,
+      "created_at": "2026-10-27T09:09:36.716087Z"
+    }
+  ],
+  "events": [
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:01.114134Z",
+      "seq": 0,
+      "type": "tool_call",
+      "tool": "update_case",
+      "input": "{\"status\": \"investigating\", \"category\": null, \"priority\": null, \"summary\": null, \"resolution_type\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:01.117227Z",
+      "seq": 1,
+      "type": "tool_call",
+      "tool": "get_order",
+      "input": "{\"order_id\": \"ORD-1002\"}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:01.141683Z",
+      "seq": 2,
+      "type": "tool_result",
+      "tool": "update_case",
+      "input": null,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-7089\", \"channel\": \"email\", \"status\": \"investigating\", \"category\": \"other\", \"priority\": \"normal\", \"summary\": \"\"}}",
+      "latency_ms": 14,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:01.188519Z",
+      "seq": 3,
+      "type": "tool_result",
+      "tool": "get_order",
+      "input": null,
+      "output": "{\"ok\": true, \"order\": {\"order_id\": \"ORD-1002\", \"status\": \"in_transit\", \"items\": [{\"name\": \"Jaket hujan\", \"qty\": 1, \"price_idr\": 349000}], \"total_idr\": 349000, \"courier\": \"NusaExpress\", \"tracking_number\": \"NX100288\", \"shipped_at\": \"2026-10-19T09:08:52Z\", \"eta\": \"2026-10-23T09:08:52Z\", \"last_scan_at\": \"2026-10-21T09:08:52Z\", \"last_scan_location\": \"Hub Bandung\", \"tracking_events\": [{\"ts\": \"2026-10-19T09:08:52Z\", \"location\": \"Gudang Jakarta\", \"desc\": \"Paket diserahkan ke kurir\"}, {\"ts\": \"2026-10-21T09:08:52Z\", \"location\": \"Hub Bandung\", \"desc\": \"Paket transit\"}], \"created_at\": \"2026-10-18T09:08:52Z\"}, \"days_late\": 4, \"days_since_last_scan\": 6, \"eligibility\": {\"apology\": true, \"voucher\": true, \"redelivery\": true, \"refund_lost_package\": true, \"escalate_not_received\": false}, \"simulated_courier_and_payment\": true}",
+      "latency_ms": 28,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:04.157411Z",
+      "seq": 4,
+      "type": "tool_call",
+      "tool": "update_case",
+      "input": "{\"status\": null, \"category\": \"lost_package\", \"priority\": null, \"summary\": \"ORD-1002 tidak ada update tracking 6 hari, eligible refund paket hilang\", \"resolution_type\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:04.159232Z",
+      "seq": 5,
+      "type": "tool_call",
+      "tool": "search_policy",
+      "input": "{\"query\": \"paket hilang tidak ada update tracking refund kompensasi\"}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:04.168991Z",
+      "seq": 6,
+      "type": "tool_result",
+      "tool": "search_policy",
+      "input": null,
+      "output": "{\"ok\": true, \"results\": [{\"text\": \"# Kebijakan Paket Hilang\\n## Kapan paket dianggap hilang\\n\\nSebuah paket kami anggap **hilang** apabila tidak ada pembaruan status tracking sama sekali selama **5 hari atau lebih**. Artinya, sejak scan terakhir dari kurir, tidak muncul pergerakan baru dalam rentang waktu tersebut. Selama tracking masih bergerak — meski lambat — paket belum dikategorikan hilang, melainkan ditangani sebagai keterlambatan biasa.\\n\\nAmbang 5 hari ini dipakai agar kami tidak terburu-buru memvonis paket hilang padahal mungkin hanya tertahan sementara di jalur pengiriman, sekaligus tidak membiarkan pelanggan menunggu tanpa kepastian terlalu lama.\", \"source\": \"lost-package-policy\", \"score\": 0.5}, {\"text\": \"# Kebijakan Paket Hilang\\n## Pilihan untuk pelanggan\\n\\nSetelah paket dinyatakan hilang, pelanggan berhak memilih salah satu dari dua penyelesaian berikut:\\n\\n- **Refund penuh** — pengembalian seluruh dana pesanan ke metode pembayaran asal. Proses pencairan mengikuti kebijakan refund yang berlaku.\\n- **Kirim ulang** — kami mengirim ulang barang yang sama tanpa biaya tambahan, selama stok tersedia.\\n\\nKeputusan ada sepenuhnya di tangan pelanggan. Asisten tidak boleh memaksakan salah satu opsi.\", \"source\": \"lost-package-policy\", \"score\": 0.5}, {\"text\": \"# Kebijakan Pengembalian Dana (Refund)\\n## Batas otomatis\\n\\nRefund dengan nilai **sampai dengan Rp100.000** dapat disetujui secara otomatis tanpa menunggu staf, selama alasannya sesuai kebijakan (misalnya paket hilang, keterlambatan yang disepakati dikompensasi refund, atau kesalahan yang jelas dari pihak kami). Ini mempercepat penyelesaian untuk kasus bernilai kecil yang sudah jelas.\", \"source\": \"refund-policy\", \"score\": 0.5}, {\"text\": \"# Kebijakan Keterlambatan Pengiriman\\n## Prinsip penanganan\\n\\nVoucher diberikan satu kali per kasus agar adil dan konsisten. Asisten tidak boleh menjanjikan kompensasi melebihi batas ini maupun menggandakan voucher. Bila pelanggan meminta lebih, atau keterlambatan disertai keluhan lain seperti barang rusak atau dugaan paket hilang, kasus diteruskan ke staf. Nada komunikasi tetap sopan, empatik, dan ringkas, dengan fokus menyelesaikan masalah, bukan sekadar meminta maaf.\", \"source\": \"shipping-delay-policy\", \"score\": 0.5}], \"retrieval\": \"static_fallback\"}",
+      "latency_ms": 2,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:04.180610Z",
+      "seq": 7,
+      "type": "tool_result",
+      "tool": "update_case",
+      "input": null,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-7089\", \"order_id\": \"ORD-1002\", \"channel\": \"email\", \"status\": \"investigating\", \"category\": \"lost_package\", \"priority\": \"normal\", \"summary\": \"ORD-1002 tidak ada update tracking 6 hari, eligible refund paket hilang\"}}",
+      "latency_ms": 16,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:08.820395Z",
+      "seq": 8,
+      "type": "tool_call",
+      "tool": "send_message",
+      "input": "{\"body\": \"Halo Kak Rani, terima kasih sudah menghubungi kami. Saya cek pesanan ORD-1002 memang tidak ada update tracking sejak 21 Oktober di Hub Bandung, sudah 6 hari. Paket ini kami kategorikan hilang. Kakak bisa pilih: 1) Refund penuh Rp349.000, atau 2) Kirim ulang barang yang sama (selama stok tersedia). Mana yang Kakak pilih?\", \"channel\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:08.822204Z",
+      "seq": 9,
+      "type": "tool_call",
+      "tool": "update_case",
+      "input": "{\"status\": \"awaiting_customer\", \"category\": null, \"priority\": null, \"summary\": null, \"resolution_type\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:08.852535Z",
+      "seq": 10,
+      "type": "tool_result",
+      "tool": "update_case",
+      "input": null,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-7089\", \"order_id\": \"ORD-1002\", \"channel\": \"email\", \"status\": \"awaiting_customer\", \"category\": \"lost_package\", \"priority\": \"normal\", \"summary\": \"ORD-1002 tidak ada update tracking 6 hari, eligible refund paket hilang\"}}",
+      "latency_ms": 23,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:09.027100Z",
+      "seq": 11,
+      "type": "tool_result",
+      "tool": "send_message",
+      "input": null,
+      "output": "{\"ok\": true, \"channel\": \"email\", \"provider_message_id\": \"010001a17c9edea4-a1f02eb0-52f7-48df-ae15-8c116578400d-000000\", \"attempts\": [{\"channel\": \"email\", \"ok\": true, \"provider_message_id\": \"010001a17c9edea4-a1f02eb0-52f7-48df-ae15-8c116578400d-000000\", \"error\": null}]}",
+      "latency_ms": 199,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:12.102198Z",
+      "seq": 12,
+      "type": "model_message",
+      "tool": null,
+      "input": null,
+      "output": "\"Kasus sedang menunggu pilihan pelanggan antara refund penuh atau kirim ulang untuk paket hilang ORD-1002 (Rp349.000). Paket memenuhi syarat refund karena tidak ada update tracking selama 6 hari. Refund memerlukan persetujuan staf karena melebihi batas otomatis Rp100.000.\"",
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:17.419764Z",
+      "seq": 0,
+      "type": "tool_call",
+      "tool": "update_case",
+      "input": "{\"status\": \"investigating\", \"category\": null, \"priority\": null, \"summary\": null, \"resolution_type\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:17.427617Z",
+      "seq": 1,
+      "type": "tool_call",
+      "tool": "get_order",
+      "input": "{\"order_id\": \"ORD-1002\"}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:17.432671Z",
+      "seq": 2,
+      "type": "tool_call",
+      "tool": "search_policy",
+      "input": "{\"query\": \"refund paket hilang tidak ada update tracking\"}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:17.455721Z",
+      "seq": 3,
+      "type": "tool_result",
+      "tool": "get_order",
+      "input": null,
+      "output": "{\"ok\": true, \"order\": {\"order_id\": \"ORD-1002\", \"status\": \"in_transit\", \"items\": [{\"name\": \"Jaket hujan\", \"qty\": 1, \"price_idr\": 349000}], \"total_idr\": 349000, \"courier\": \"NusaExpress\", \"tracking_number\": \"NX100288\", \"shipped_at\": \"2026-10-19T09:08:52Z\", \"eta\": \"2026-10-23T09:08:52Z\", \"last_scan_at\": \"2026-10-21T09:08:52Z\", \"last_scan_location\": \"Hub Bandung\", \"tracking_events\": [{\"ts\": \"2026-10-19T09:08:52Z\", \"location\": \"Gudang Jakarta\", \"desc\": \"Paket diserahkan ke kurir\"}, {\"ts\": \"2026-10-21T09:08:52Z\", \"location\": \"Hub Bandung\", \"desc\": \"Paket transit\"}], \"created_at\": \"2026-10-18T09:08:52Z\"}, \"days_late\": 4, \"days_since_last_scan\": 6, \"eligibility\": {\"apology\": true, \"voucher\": true, \"redelivery\": true, \"refund_lost_package\": true, \"escalate_not_received\": false}, \"simulated_courier_and_payment\": true}",
+      "latency_ms": 12,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:17.498017Z",
+      "seq": 4,
+      "type": "tool_result",
+      "tool": "update_case",
+      "input": null,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-7089\", \"order_id\": \"ORD-1002\", \"channel\": \"email\", \"status\": \"investigating\", \"category\": \"lost_package\", \"priority\": \"normal\", \"summary\": \"ORD-1002 tidak ada update tracking 6 hari, eligible refund paket hilang\"}}",
+      "latency_ms": 19,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:17.843938Z",
+      "seq": 5,
+      "type": "tool_result",
+      "tool": "search_policy",
+      "input": null,
+      "output": "{\"ok\": true, \"results\": [{\"text\": \"# Kebijakan Paket Hilang\\n## Kapan paket dianggap hilang\\n\\nSebuah paket kami anggap **hilang** apabila tidak ada pembaruan status tracking sama sekali selama **5 hari atau lebih**. Artinya, sejak scan terakhir dari kurir, tidak muncul pergerakan baru dalam rentang waktu tersebut. Selama tracking masih bergerak — meski lambat — paket belum dikategorikan hilang, melainkan ditangani sebagai keterlambatan biasa.\\n\\nAmbang 5 hari ini dipakai agar kami tidak terburu-buru memvonis paket hilang padahal mungkin hanya tertahan sementara di jalur pengiriman, sekaligus tidak membiarkan pelanggan menunggu tanpa kepastian terlalu lama.\", \"source\": \"lost-package-policy\", \"score\": 0.6}, {\"text\": \"# Kebijakan Paket Hilang\\n## Pilihan untuk pelanggan\\n\\nSetelah paket dinyatakan hilang, pelanggan berhak memilih salah satu dari dua penyelesaian berikut:\\n\\n- **Refund penuh** — pengembalian seluruh dana pesanan ke metode pembayaran asal. Proses pencairan mengikuti kebijakan refund yang berlaku.\\n- **Kirim ulang** — kami mengirim ulang barang yang sama tanpa biaya tambahan, selama stok tersedia.\\n\\nKeputusan ada sepenuhnya di tangan pelanggan. Asisten tidak boleh memaksakan salah satu opsi.\", \"source\": \"lost-package-policy\", \"score\": 0.6}, {\"text\": \"# Kebijakan Pengembalian Dana (Refund)\\n## Batas otomatis\\n\\nRefund dengan nilai **sampai dengan Rp100.000** dapat disetujui secara otomatis tanpa menunggu staf, selama alasannya sesuai kebijakan (misalnya paket hilang, keterlambatan yang disepakati dikompensasi refund, atau kesalahan yang jelas dari pihak kami). Ini mempercepat penyelesaian untuk kasus bernilai kecil yang sudah jelas.\", \"source\": \"refund-policy\", \"score\": 0.6}, {\"text\": \"# Panduan Komunikasi\\n## Yang tidak boleh dijanjikan\\n\\nJangan pernah menjanjikan sesuatu di luar kebijakan. Secara khusus:\\n\\n- Jangan menjanjikan **refund pasti** untuk nominal di atas Rp100.000 — itu butuh persetujuan staf; cukup katakan permintaan sedang diverifikasi.\\n- Jangan menjanjikan voucher melebihi **Rp25.000** atau lebih dari satu voucher per kasus.\\n- Jangan menjanjikan tanggal tiba yang pasti; sampaikan sebagai estimasi.\\n- Jangan menjamin perubahan alamat setelah paket dikirim.\", \"source\": \"communication-guidelines\", \"score\": 0.4}], \"retrieval\": \"static_fallback\"}",
+      "latency_ms": 376,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:20.595642Z",
+      "seq": 6,
+      "type": "tool_call",
+      "tool": "request_refund",
+      "input": "{\"order_id\": \"ORD-1002\", \"amount_idr\": 349000, \"reason\": \"Paket hilang, tidak ada update tracking sejak 21 Oktober (6 hari)\"}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:20.646262Z",
+      "seq": 7,
+      "type": "tool_result",
+      "tool": "request_refund",
+      "input": null,
+      "output": "{\"ok\": true, \"status\": \"pending_approval\", \"approval_id\": \"APR-966E763234\", \"amount_idr\": 349000}",
+      "latency_ms": 44,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:24.724787Z",
+      "seq": 8,
+      "type": "tool_call",
+      "tool": "send_message",
+      "input": "{\"body\": \"Baik Kak Rani, permintaan refund Rp349.000 untuk pesanan ORD-1002 sedang diverifikasi oleh tim kami. Kami akan kabari secepatnya setelah proses verifikasi selesai. Terima kasih atas kesabarannya.\", \"channel\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:24.726625Z",
+      "seq": 9,
+      "type": "tool_call",
+      "tool": "update_case",
+      "input": "{\"status\": \"awaiting_approval\", \"category\": null, \"priority\": null, \"summary\": \"Pelanggan pilih refund penuh Rp349.000 untuk ORD-1002 (paket hilang 6 hari tanpa update tracking). Refund pending approval APR-966E763234.\", \"resolution_type\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:24.762631Z",
+      "seq": 10,
+      "type": "tool_result",
+      "tool": "update_case",
+      "input": null,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-7089\", \"order_id\": \"ORD-1002\", \"channel\": \"email\", \"status\": \"awaiting_approval\", \"category\": \"lost_package\", \"priority\": \"normal\", \"summary\": \"Pelanggan pilih refund penuh Rp349.000 untuk ORD-1002 (paket hilang 6 hari tanpa update tracking). Refund pending approval APR-966E763234.\"}}",
+      "latency_ms": 28,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:24.924341Z",
+      "seq": 11,
+      "type": "tool_result",
+      "tool": "send_message",
+      "input": null,
+      "output": "{\"ok\": true, \"channel\": \"email\", \"provider_message_id\": \"010001a17c9f1cbc-37e076d7-56b9-4ee9-9256-874c51b6b7ef-000000\", \"attempts\": [{\"channel\": \"email\", \"ok\": true, \"provider_message_id\": \"010001a17c9f1cbc-37e076d7-56b9-4ee9-9256-874c51b6b7ef-000000\", \"error\": null}]}",
+      "latency_ms": 191,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:28.491863Z",
+      "seq": 12,
+      "type": "model_message",
+      "tool": null,
+      "input": null,
+      "output": "\"**Ringkasan internal:** Pelanggan memilih refund untuk ORD-1002 (Rp349.000). Karena nilai di atas batas otomatis Rp100.000, refund memerlukan persetujuan staf (APR-966E763234). Pelanggan sudah diberitahu bahwa permintaan sedang diverifikasi dan akan dikabari setelah selesai. Kasus menunggu keputusan approval.\"",
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:36.497274Z",
+      "seq": 0,
+      "type": "tool_call",
+      "tool": "send_message",
+      "input": "{\"body\": \"Halo Kak Rani, mohon maaf atas ketidaknyamanannya. Setelah verifikasi lebih lanjut, permintaan refund untuk pesanan ORD-1002 belum dapat kami proses saat ini. Tim kami akan menghubungi Kakak segera untuk penjelasan lebih detail dan solusi terbaik.\", \"channel\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:36.500117Z",
+      "seq": 1,
+      "type": "tool_call",
+      "tool": "escalate_to_human",
+      "input": "{\"reason\": \"refund ditolak staf untuk ORD-1002 (Rp349.000, paket hilang 6 hari tanpa tracking)\", \"priority\": \"normal\"}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:36.558175Z",
+      "seq": 2,
+      "type": "escalation",
+      "tool": null,
+      "input": "{\"reason\": \"refund ditolak staf untuk ORD-1002 (Rp349.000, paket hilang 6 hari tanpa tracking)\", \"priority\": \"normal\"}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:36.687644Z",
+      "seq": 3,
+      "type": "tool_result",
+      "tool": "send_message",
+      "input": null,
+      "output": "{\"ok\": true, \"channel\": \"email\", \"provider_message_id\": \"010001a17c9f4ab5-b3c3bae2-9940-4df9-8dc0-4912cfeae320-000000\", \"attempts\": [{\"channel\": \"email\", \"ok\": true, \"provider_message_id\": \"010001a17c9f4ab5-b3c3bae2-9940-4df9-8dc0-4912cfeae320-000000\", \"error\": null}]}",
+      "latency_ms": 178,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:36.724998Z",
+      "seq": 4,
+      "type": "tool_result",
+      "tool": "escalate_to_human",
+      "input": null,
+      "output": "{\"ok\": true, \"escalated\": true, \"priority\": \"normal\", \"staff_on_duty\": true, \"customer_notified\": true}",
+      "latency_ms": 186,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-7089",
+      "ts": "2026-10-27T09:09:39.465348Z",
+      "seq": 5,
+      "type": "model_message",
+      "tool": null,
+      "input": null,
+      "output": "\"**Ringkasan internal:** Refund APR-966E763234 untuk ORD-1002 (Rp349.000) ditolak staf tanpa catatan. Pelanggan sudah diberi tahu bahwa tim akan menghubungi untuk penjelasan lebih lanjut. Kasus dieskalasi ke staf manusia untuk penanganan lebih lanjut.\"",
+      "latency_ms": null,
+      "ok": true
+    }
+  ],
+  "approvals": [
+    {
+      "approval_id": "APR-966E763234",
+      "case_id": "CASE-20261027-7089",
+      "order_id": "ORD-1002",
+      "action": "refund",
+      "amount_idr": 349000,
+      "reason": "Paket hilang, tidak ada update tracking sejak 21 Oktober (6 hari)",
+      "status": "rejected",
+      "requested_at": "2026-10-27T09:09:20.630357Z",
+      "decided_at": "2026-10-27T09:09:32Z",
+      "decided_by": "e2e-script",
+      "note": null
+    }
+  ],
+  "approval_records": [
+    {
+      "approval_id": "APR-966E763234",
+      "case_id": "CASE-20261027-7089",
+      "order_id": "ORD-1002",
+      "action": "refund",
+      "amount_idr": 349000,
+      "reason": "Paket hilang, tidak ada update tracking sejak 21 Oktober (6 hari)",
+      "status": "rejected",
+      "requested_at": "2026-10-27T09:09:20.630357Z",
+      "decided_at": "2026-10-27T09:09:32Z",
+      "decided_by": "e2e-script",
+      "note": null,
+      "case": {
+        "case_id": "CASE-20261027-7089",
+        "status": "escalated",
+        "category": "lost_package",
+        "priority": "normal",
+        "channel": "email",
+        "customer_name": "Rani",
+        "order_id": "ORD-1002",
+        "summary": "Pelanggan pilih refund penuh Rp349.000 untuk ORD-1002 (paket hilang 6 hari tanpa update tracking). Refund pending approval APR-966E763234.",
+        "created_at": "2026-10-27T09:08:52Z",
+        "updated_at": "2026-10-27T09:09:39Z",
+        "resolution_type": "escalated"
+      }
+    }
+  ]
+}

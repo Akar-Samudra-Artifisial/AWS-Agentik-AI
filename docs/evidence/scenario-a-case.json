@@ -1,0 +1,240 @@
+{
+  "case": {
+    "case_id": "CASE-20261027-CFD7",
+    "customer_id": "CUST-0001",
+    "order_id": "ORD-1001",
+    "channel": "email",
+    "status": "awaiting_customer",
+    "category": "late_delivery",
+    "priority": "normal",
+    "resolution_type": null,
+    "resolution": null,
+    "summary": "ORD-1001 terlambat 2 hari, status in_transit, pelanggan minta bantuan",
+    "first_inbound_at": "2026-10-27T08:49:08Z",
+    "first_response_at": "2026-10-27T08:49:25.180554Z",
+    "resolved_at": null,
+    "created_at": "2026-10-27T08:49:08Z",
+    "updated_at": "2026-10-27T08:49:27Z",
+    "lock_until": null,
+    "seeded": false
+  },
+  "customer": {
+    "customer_id": "CUST-0001",
+    "name": "Rani",
+    "phone_e164": "+62877****348",
+    "email": "l***@gmail.com",
+    "language": "id",
+    "preferred_channel": "whatsapp",
+    "created_at": "2026-07-29T08:23:37Z"
+  },
+  "order": {
+    "order_id": "ORD-1001",
+    "customer_id": "CUST-0001",
+    "status": "in_transit",
+    "items": [
+      {
+        "name": "Sepatu lari",
+        "qty": 1,
+        "price_idr": 189000
+      }
+    ],
+    "total_idr": 189000,
+    "courier": "NusaExpress",
+    "tracking_number": "NX100188",
+    "shipped_at": "2026-10-22T08:48:55Z",
+    "eta": "2026-10-25T08:48:55Z",
+    "last_scan_at": "2026-10-26T08:48:55Z",
+    "last_scan_location": "Hub Bandung",
+    "tracking_events": [
+      {
+        "ts": "2026-10-22T08:48:55Z",
+        "location": "Gudang Jakarta",
+        "desc": "Paket diserahkan ke kurir"
+      },
+      {
+        "ts": "2026-10-26T08:48:55Z",
+        "location": "Hub Bandung",
+        "desc": "Paket transit"
+      }
+    ],
+    "redelivery_at": null,
+    "refund": null,
+    "created_at": "2026-10-21T08:48:55Z"
+  },
+  "messages": [
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "msg_id": "031ddeb7d6ff46e38405eeb599ac3e34",
+      "ts": "2026-10-27T08:49:08Z",
+      "direction": "inbound",
+      "author": "customer",
+      "channel": "email",
+      "body": "Halo, pesanan saya ORD-1001 sudah terlambat 3 hari dari estimasi dan belum sampai. Tolong dibantu.",
+      "provider_message_id": null,
+      "delivery_status": "delivered",
+      "error": null,
+      "simulated": true,
+      "created_at": "2026-10-27T08:49:08Z"
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "msg_id": "MSG-f37087a26e13",
+      "ts": "2026-10-27T08:49:25.180554Z",
+      "direction": "outbound",
+      "author": "agent",
+      "channel": "email",
+      "body": "Halo Kak Rani, terima kasih sudah menghubungi kami. Mohon maaf atas keterlambatan pesanan ORD-1001 (Sepatu lari). Paket Kakak saat ini sedang transit di Hub Bandung dan masih dalam perjalanan.\n\nSebagai kompensasi keterlambatan, Kakak bisa memilih salah satu:\n1. Jadwal ulang pengiriman prioritas\n2. Voucher belanja Rp25.000\n3. Berbicara dengan tim staf kami\n\nPilihan mana yang Kakak inginkan?",
+      "provider_message_id": "010001a17c8cce39-9f153ba5-9297-4a27-8d42-9ffae5a874e9-000000",
+      "delivery_status": "sent",
+      "error": null,
+      "simulated": false,
+      "created_at": "2026-10-27T08:49:25.180554Z"
+    }
+  ],
+  "events": [
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:17.778437Z",
+      "seq": 0,
+      "type": "tool_call",
+      "tool": "update_case",
+      "input": "{\"status\": \"investigating\", \"category\": null, \"priority\": null, \"summary\": null, \"resolution_type\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:17.780835Z",
+      "seq": 1,
+      "type": "tool_call",
+      "tool": "get_order",
+      "input": "{\"order_id\": \"ORD-1001\"}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:17.805978Z",
+      "seq": 2,
+      "type": "tool_result",
+      "tool": "update_case",
+      "input": null,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-CFD7\", \"channel\": \"email\", \"status\": \"investigating\", \"category\": \"other\", \"priority\": \"normal\", \"summary\": \"\"}}",
+      "latency_ms": 14,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:17.842961Z",
+      "seq": 3,
+      "type": "tool_result",
+      "tool": "get_order",
+      "input": null,
+      "output": "{\"ok\": true, \"order\": {\"order_id\": \"ORD-1001\", \"status\": \"in_transit\", \"items\": [{\"name\": \"Sepatu lari\", \"qty\": 1, \"price_idr\": 189000}], \"total_idr\": 189000, \"courier\": \"NusaExpress\", \"tracking_number\": \"NX100188\", \"shipped_at\": \"2026-10-22T08:48:55Z\", \"eta\": \"2026-10-25T08:48:55Z\", \"last_scan_at\": \"2026-10-26T08:48:55Z\", \"last_scan_location\": \"Hub Bandung\", \"tracking_events\": [{\"ts\": \"2026-10-22T08:48:55Z\", \"location\": \"Gudang Jakarta\", \"desc\": \"Paket diserahkan ke kurir\"}, {\"ts\": \"2026-10-26T08:48:55Z\", \"location\": \"Hub Bandung\", \"desc\": \"Paket transit\"}], \"created_at\": \"2026-10-21T08:48:55Z\"}, \"days_late\": 2, \"days_since_last_scan\": 1, \"eligibility\": {\"apology\": true, \"voucher\": true, \"redelivery\": true, \"refund_lost_package\": false, \"escalate_not_received\": false}, \"simulated_courier_and_payment\": true}",
+      "latency_ms": 26,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:20.690869Z",
+      "seq": 4,
+      "type": "tool_call",
+      "tool": "update_case",
+      "input": "{\"status\": null, \"category\": \"late_delivery\", \"priority\": null, \"summary\": \"ORD-1001 terlambat 2 hari, status in_transit, pelanggan minta bantuan\", \"resolution_type\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:20.692304Z",
+      "seq": 5,
+      "type": "tool_call",
+      "tool": "search_policy",
+      "input": "{\"query\": \"pesanan terlambat 2 hari kompensasi voucher\"}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:20.699952Z",
+      "seq": 6,
+      "type": "tool_result",
+      "tool": "search_policy",
+      "input": null,
+      "output": "{\"ok\": true, \"results\": [{\"text\": \"# Kebijakan Keterlambatan Pengiriman\\n## Terlambat 2 hari atau lebih\\n\\nJika keterlambatan mencapai **2 hari atau lebih**, pelanggan berhak atas kompensasi. Kami menawarkan tiga opsi dan membiarkan pelanggan memilih:\\n\\n- **Jadwal ulang atau prioritas pengiriman** — kami mengatur agar paket didahulukan atau menjadwalkan ulang pengiriman sesuai kesediaan pelanggan.\\n- **Voucher belanja senilai maksimal Rp25.000** — diberikan otomatis sebagai bentuk permohonan maaf. Batas ini hanya **1 voucher per kasus** dan tidak dapat diakumulasi. Nilai di atas Rp25.000 tidak dapat diberikan otomatis dan harus melalui staf.\\n- **Berbicara dengan staf** — bila pelanggan menginginkan penanganan khusus atau tidak puas dengan opsi di atas.\", \"source\": \"shipping-delay-policy\", \"score\": 0.8}, {\"text\": \"# Kebijakan Keterlambatan Pengiriman\\n## Terlambat 1 hari atau lebih\\n\\nApabila pesanan melewati ETA sebanyak **1 hari atau lebih**, kami lebih dulu menyampaikan permintaan maaf dengan tulus dan memberikan informasi tracking terbaru. Pada tahap ini pengiriman biasanya masih berjalan, sehingga langkah utama adalah menenangkan pelanggan dan memastikan mereka tahu posisi paket terkini beserta perkiraan tiba yang baru.\", \"source\": \"shipping-delay-policy\", \"score\": 0.6}, {\"text\": \"# Kebijakan Perubahan Alamat\\nKebijakan ini mengatur kapan alamat pengiriman sebuah pesanan masih dapat diubah dan apa yang terjadi bila permintaan datang terlambat.\", \"source\": \"address-change-policy\", \"score\": 0.4}, {\"text\": \"# Kebijakan Keterlambatan Pengiriman\\nKami memahami bahwa menunggu pesanan yang terlambat bisa membuat pelanggan cemas. Kebijakan ini mengatur bagaimana tim dan asisten kami menanggapi keterlambatan dibanding estimasi waktu tiba (ETA) yang dijanjikan.\", \"source\": \"shipping-delay-policy\", \"score\": 0.4}], \"retrieval\": \"static_fallback\"}",
+      "latency_ms": 1,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:20.716062Z",
+      "seq": 7,
+      "type": "tool_result",
+      "tool": "update_case",
+      "input": null,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-CFD7\", \"order_id\": \"ORD-1001\", \"channel\": \"email\", \"status\": \"investigating\", \"category\": \"late_delivery\", \"priority\": \"normal\", \"summary\": \"ORD-1001 terlambat 2 hari, status in_transit, pelanggan minta bantuan\"}}",
+      "latency_ms": 14,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:24.973716Z",
+      "seq": 8,
+      "type": "tool_call",
+      "tool": "send_message",
+      "input": "{\"body\": \"Halo Kak Rani, terima kasih sudah menghubungi kami. Mohon maaf atas keterlambatan pesanan ORD-1001 (Sepatu lari). Paket Kakak saat ini sedang transit di Hub Bandung dan masih dalam perjalanan.\\n\\nSebagai kompensasi keterlambatan, Kakak bisa memilih salah satu:\\n1. Jadwal ulang pengiriman prioritas\\n2. Voucher belanja Rp25.000\\n3. Berbicara dengan tim staf kami\\n\\nPilihan mana yang Kakak inginkan?\", \"channel\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:24.975124Z",
+      "seq": 9,
+      "type": "tool_call",
+      "tool": "update_case",
+      "input": "{\"status\": \"awaiting_customer\", \"category\": null, \"priority\": null, \"summary\": null, \"resolution_type\": null}",
+      "output": null,
+      "latency_ms": null,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:25.002637Z",
+      "seq": 10,
+      "type": "tool_result",
+      "tool": "update_case",
+      "input": null,
+      "output": "{\"ok\": true, \"case\": {\"case_id\": \"CASE-20261027-CFD7\", \"order_id\": \"ORD-1001\", \"channel\": \"email\", \"status\": \"awaiting_customer\", \"category\": \"late_delivery\", \"priority\": \"normal\", \"summary\": \"ORD-1001 terlambat 2 hari, status in_transit, pelanggan minta bantuan\"}}",
+      "latency_ms": 20,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:25.202989Z",
+      "seq": 11,
+      "type": "tool_result",
+      "tool": "send_message",
+      "input": null,
+      "output": "{\"ok\": true, \"channel\": \"email\", \"provider_message_id\": \"010001a17c8cce39-9f153ba5-9297-4a27-8d42-9ffae5a874e9-000000\", \"attempts\": [{\"channel\": \"email\", \"ok\": true, \"provider_message_id\": \"010001a17c8cce39-9f153ba5-9297-4a27-8d42-9ffae5a874e9-000000\", \"error\": null}]}",
+      "latency_ms": 222,
+      "ok": true
+    },
+    {
+      "case_id": "CASE-20261027-CFD7",
+      "ts": "2026-10-27T08:49:27.631577Z",
+      "seq": 12,
+      "type": "model_message",
+      "tool": null,
+      "input": null,
+      "output": "\"Kasus ORD-1001 terlambat 2 hari: telah menawarkan 3 opsi kompensasi sesuai kebijakan (redelivery prioritas, voucher Rp25.000, atau eskalasi ke staf). Menunggu pilihan pelanggan.\"",
+      "latency_ms": null,
+      "ok": true
+    }
+  ],
+  "approvals": []
+}
