@@ -42,6 +42,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 __all__ = [
     "DEFAULT_TABLE_PREFIX",
+    "AGENT_EVENTS_SORT_KEY",
+    "MESSAGES_SORT_KEY",
     "to_dynamo",
     "from_dynamo",
     "CaseLockedError",
@@ -58,6 +60,10 @@ __all__ = [
 ]
 
 DEFAULT_TABLE_PREFIX = "resolveai-dev"
+
+# Sort key attribute names; must match the deployed tables (infra/stacks/data_stack.py).
+MESSAGES_SORT_KEY = "ts#msg_id"
+AGENT_EVENTS_SORT_KEY = "ts#seq"
 
 # Case lock time-to-live in seconds (BE-007: lock per case via conditional update).
 CASE_LOCK_TTL_SECONDS = 150
@@ -271,7 +277,7 @@ class CaseRepository(_BaseRepository):
 
 
 class MessageRepository(_BaseRepository):
-    """``messages`` table. PK ``case_id``, SK ``sk`` (``ts#msg_id``)."""
+    """``messages`` table. PK ``case_id``, SK ``ts#msg_id`` (``MESSAGES_SORT_KEY``)."""
 
     @staticmethod
     def _sort_key(message: Message) -> str:
@@ -279,7 +285,7 @@ class MessageRepository(_BaseRepository):
 
     def put(self, message: Message) -> None:
         item = _dump(message)
-        item["sk"] = self._sort_key(message)
+        item[MESSAGES_SORT_KEY] = self._sort_key(message)
         self._table.put_item(Item=item)
 
     def list_for_case(
@@ -305,12 +311,13 @@ class MessageRepository(_BaseRepository):
         if newest:
             items.reverse()
         return [
-            Message.model_validate({k: v for k, v in item.items() if k != "sk"}) for item in items
+            Message.model_validate({k: v for k, v in item.items() if k != MESSAGES_SORT_KEY})
+            for item in items
         ]
 
 
 class AgentEventRepository(_BaseRepository):
-    """``agent_events`` table. PK ``case_id``, SK ``sk`` (``ts#seq``)."""
+    """``agent_events`` table. PK ``case_id``, SK ``ts#seq`` (``AGENT_EVENTS_SORT_KEY``)."""
 
     @staticmethod
     def _sort_key(event: AgentEvent) -> str:
@@ -318,7 +325,7 @@ class AgentEventRepository(_BaseRepository):
 
     def put(self, event: AgentEvent) -> None:
         item = _dump(event)
-        item["sk"] = self._sort_key(event)
+        item[AGENT_EVENTS_SORT_KEY] = self._sort_key(event)
         self._table.put_item(Item=item)
 
     def list_for_case(self, case_id: str) -> list[AgentEvent]:
@@ -329,7 +336,9 @@ class AgentEventRepository(_BaseRepository):
             ScanIndexForward=True,
         )
         return [
-            AgentEvent.model_validate({k: v for k, v in item.items() if k != "sk"})
+            AgentEvent.model_validate(
+                {k: v for k, v in item.items() if k != AGENT_EVENTS_SORT_KEY}
+            )
             for item in items
         ]
 

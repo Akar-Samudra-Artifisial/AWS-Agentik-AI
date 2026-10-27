@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from resolveai_common.repository import AGENT_EVENTS_SORT_KEY, MESSAGES_SORT_KEY
+
 _S = "S"
 
 
@@ -34,8 +36,8 @@ TABLES: dict[str, tuple[str, str | None, list[dict[str, Any]]]] = {
             _gsi("by_status", "status", "updated_at"),
         ],
     ),
-    "messages": ("case_id", "sk", []),
-    "agent_events": ("case_id", "sk", []),
+    "messages": ("case_id", MESSAGES_SORT_KEY, []),
+    "agent_events": ("case_id", AGENT_EVENTS_SORT_KEY, []),
     "approvals": ("approval_id", None, [_gsi("by_status", "status", "requested_at")]),
     "processed_events": ("event_id", None, []),
 }

@@ -14,7 +14,11 @@ from typing import Any
 import boto3
 import pytest
 from moto import mock_aws
-from resolveai_common.repository import Repositories
+from resolveai_common.repository import (
+    AGENT_EVENTS_SORT_KEY,
+    MESSAGES_SORT_KEY,
+    Repositories,
+)
 
 BACKEND_DIR = Path(__file__).resolve().parents[2] / "backend"
 if str(BACKEND_DIR) not in sys.path:
@@ -74,8 +78,8 @@ def _create_tables(dynamodb: Any) -> None:
             ("by_status", "status", "updated_at"),
         ],
     )
-    table("messages", "case_id", "sk")
-    table("agent_events", "case_id", "sk")
+    table("messages", "case_id", MESSAGES_SORT_KEY)
+    table("agent_events", "case_id", AGENT_EVENTS_SORT_KEY)
     table("approvals", "approval_id", gsis=[("by_status", "status", "requested_at")])
     table("processed_events", "event_id")
 
