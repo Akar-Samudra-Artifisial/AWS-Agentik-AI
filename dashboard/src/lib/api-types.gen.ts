@@ -389,6 +389,8 @@ export interface components {
             /** Updated At */
             updated_at: string;
             resolution_type?: components["schemas"]["ResolutionType"] | null;
+            /** Resolution Summary */
+            resolution_summary?: string | null;
         };
         /**
          * Channel

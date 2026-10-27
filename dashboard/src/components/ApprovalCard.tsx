@@ -71,7 +71,7 @@ export function ApprovalCard({
       )}
       aria-label={`Approval ${approval.approval_id}`}
     >
-      <div className={cx("flex flex-wrap items-start justify-between gap-3", compact ? "px-4 pt-3" : "px-5 pt-4")}>
+      <div className={cx("flex items-start justify-between gap-3", compact ? "px-4 pt-3" : "px-5 pt-4")}>
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
             Refund · <span className="font-mono normal-case">{approval.approval_id}</span>
@@ -85,7 +85,7 @@ export function ApprovalCard({
             {customer ? <span> · {customer}</span> : null}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-1.5">
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
           <ApprovalStatusBadge status={approval.status} />
           <SimulatedTag label="Pembayaran disimulasikan" />
         </div>

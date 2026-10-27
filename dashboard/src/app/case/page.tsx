@@ -75,7 +75,9 @@ function CaseView() {
 function CaseDetailView({ detail }: { detail: CaseDetail }) {
   const c = detail.case;
   const firstResponse = diffMs(c.first_inbound_at, c.first_response_at);
-  const duration = diffMs(c.first_inbound_at ?? c.created_at, c.resolved_at ?? null);
+  // Status final tanpa resolved_at (mis. escalated) dihitung sampai update terakhir; "Berjalan" hanya untuk kasus aktif.
+  const isFinal = c.status === "resolved" || c.status === "escalated";
+  const duration = diffMs(c.first_inbound_at ?? c.created_at, c.resolved_at ?? (isFinal ? c.updated_at : null));
   const pending = detail.approvals.filter((a) => a.status === "pending");
   const history = detail.approvals.filter((a) => a.status !== "pending");
   // case.summary bisa basi (mis. "pending approval") setelah kasus selesai; resolusi lebih akurat.

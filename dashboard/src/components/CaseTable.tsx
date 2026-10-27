@@ -32,7 +32,10 @@ export function CaseTable({ cases, dense = false }: { cases: CaseSummary[]; dens
           </tr>
         </thead>
         <tbody className="divide-y divide-stone-100">
-          {cases.map((c) => (
+          {cases.map((c) => {
+            // Sama dengan halaman detail: summary bisa basi setelah kasus selesai.
+            const headline = (c.status === "resolved" && c.resolution_summary) || c.summary;
+            return (
             <tr
               key={c.case_id}
               onClick={() => router.push(caseHref(c.case_id))}
@@ -66,7 +69,7 @@ export function CaseTable({ cases, dense = false }: { cases: CaseSummary[]; dens
               ) : null}
               {!dense ? (
                 <td className={`${cell} max-w-xs text-stone-600`}>
-                  <p className="line-clamp-2">{c.summary ? maskText(c.summary) : "—"}</p>
+                  <p className="line-clamp-2">{headline ? maskText(headline) : "—"}</p>
                 </td>
               ) : null}
               <td className={`${cell} whitespace-nowrap text-right text-stone-500`}>
@@ -75,7 +78,8 @@ export function CaseTable({ cases, dense = false }: { cases: CaseSummary[]; dens
                 </time>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
