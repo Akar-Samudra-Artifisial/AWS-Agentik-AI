@@ -67,7 +67,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">
         Lewati ke konten
       </a>
-      <aside className="border-b border-stone-200 bg-white lg:sticky lg:top-0 lg:h-screen lg:w-60 lg:shrink-0 lg:border-r lg:border-b-0">
+      <aside className="border-b border-stone-200 bg-white lg:w-60 lg:shrink-0 lg:border-r lg:border-b-0">
+        {/* aside meregang setinggi konten (latar + border penuh); isinya yang sticky. */}
+        <div className="lg:sticky lg:top-0 lg:max-h-screen lg:overflow-y-auto">
         <div className="flex items-center justify-between gap-3 px-5 py-4 lg:block">
           <Link href="/" className="flex items-center gap-2.5">
             <span aria-hidden="true" className="grid size-8 place-items-center rounded-lg bg-brand-900 text-sm font-bold text-white">
@@ -104,6 +106,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             })}
           </ul>
         </nav>
+        </div>
       </aside>
       <main id="main" className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
         {!isApiConfigured ? (

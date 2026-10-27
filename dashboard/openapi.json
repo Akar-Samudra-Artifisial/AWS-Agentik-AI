@@ -1426,6 +1426,17 @@
                 "type": "null"
               }
             ]
+          },
+          "resolution_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Summary"
           }
         },
         "type": "object",
