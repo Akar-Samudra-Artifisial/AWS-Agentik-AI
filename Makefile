@@ -14,6 +14,8 @@ CDK := cd infra && . .venv/bin/activate && npx --yes aws-cdk@2
 
 # Context deploy dari env/.env agar `make deploy` tidak menghapus env runtime Lambda.
 -include .env
+# Ekspor variabel .env ke script Python (e2e, seed, eval) yang membaca env.
+export $(shell [ -f .env ] && sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' .env)
 DEMO_RESET_ENABLED ?= true
 DEPLOY_CONTEXT := -c demo_reset_enabled=$(DEMO_RESET_ENABLED) \
 	$(if $(SES_FROM_EMAIL),-c ses_from_email=$(SES_FROM_EMAIL)) \
