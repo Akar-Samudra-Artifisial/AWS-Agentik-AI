@@ -11,6 +11,24 @@ function daysSince(iso: string | null | undefined, now: number = Date.now()): nu
   return Number.isNaN(t) ? null : Math.max(0, Math.floor((now - t) / DAY_MS));
 }
 
+/** Titik akhir (ms) untuk menghitung keterlambatan terhadap eta; null bila tak relevan. */
+function lateEnd(order: Order): number | null {
+  const at = (iso: string | null | undefined) => {
+    const t = iso ? Date.parse(iso) : NaN;
+    return Number.isNaN(t) ? null : t;
+  };
+  switch (order.status) {
+    case "delivered":
+      return at(order.last_scan_at);
+    case "refunded":
+      return at(order.refund?.at) ?? at(order.last_scan_at);
+    case "cancelled":
+      return null;
+    default:
+      return Date.now();
+  }
+}
+
 export function OrderCard({ order }: { order: Order | null | undefined }) {
   if (!order) {
     return (
@@ -21,8 +39,10 @@ export function OrderCard({ order }: { order: Order | null | undefined }) {
     );
   }
   // Backend tidak mengirim days_late/days_since_last_scan; dihitung dari eta/last_scan_at.
-  const open = !["delivered", "cancelled", "refunded"].includes(order.status);
-  const late = open ? daysSince(order.eta) ?? 0 : 0;
+  // Keterlambatan = eta → titik akhir: sekarang (masih jalan), scan terakhir (terkirim),
+  // waktu refund (direfund). Dibatalkan tanpa titik akhir → "—".
+  const end = lateEnd(order);
+  const late = end != null ? daysSince(order.eta, end) : null;
   const sinceScan = daysSince(order.last_scan_at);
   return (
     <Card>
@@ -35,8 +55,12 @@ export function OrderCard({ order }: { order: Order | null | undefined }) {
         <Field
           label="Keterlambatan"
           value={
-            late > 0 ? (
-              <span className="rounded bg-red-50 px-1.5 text-red-800">{late} hari</span>
+            late == null ? (
+              <span className="text-stone-500">—</span>
+            ) : late > 0 ? (
+              <span className="rounded bg-red-50 px-1.5 text-red-800">
+                {late} hari{order.status === "refunded" ? " (saat refund)" : ""}
+              </span>
             ) : (
               <span className="text-stone-600">Tepat waktu</span>
             )

@@ -78,6 +78,8 @@ function CaseDetailView({ detail }: { detail: CaseDetail }) {
   const duration = diffMs(c.first_inbound_at ?? c.created_at, c.resolved_at ?? null);
   const pending = detail.approvals.filter((a) => a.status === "pending");
   const history = detail.approvals.filter((a) => a.status !== "pending");
+  // case.summary bisa basi (mis. "pending approval") setelah kasus selesai; resolusi lebih akurat.
+  const headline = (c.status === "resolved" && c.resolution?.summary) || c.summary;
 
   return (
     <>
@@ -89,7 +91,7 @@ function CaseDetailView({ detail }: { detail: CaseDetail }) {
             <ChannelBadge channel={c.channel} />
             <PriorityBadge priority={c.priority} />
           </div>
-          {c.summary ? <p className="mt-1.5 max-w-3xl text-[15px] text-stone-600">{maskText(c.summary)}</p> : null}
+          {headline ? <p className="mt-1.5 max-w-3xl text-[15px] text-stone-600">{maskText(headline)}</p> : null}
         </div>
       </header>
 
