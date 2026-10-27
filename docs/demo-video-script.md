@@ -66,7 +66,7 @@ Jangan katakan WhatsApp/SMS sudah berjalan.
 | README Inggris + instruksi setup | Sudah (status kanal jujur, Live demo, Evidence, Submission) |
 | Deskripsi proyek (masalah, solusi, arsitektur, dampak) | Sudah (`README.md`) |
 | Bukti (case JSON, screenshot dashboard, eval RAG) → `docs/evidence/` | Sudah |
-| Video demo ~3 menit (naskah ini) | Belum direkam |
+| Video demo ~3 menit (naskah ini) | Selesai — https://www.youtube.com/watch?v=GprVqlJucqU (2:55, Remotion + narasi Amazon Polly; teks narasi final ada di project Remotion `scripts/resolveai/narration.json`) |
 | Tautan solusi: `https://dhv2ziygcntil.cloudfront.net` + instruksi mencoba | Sudah (README → Live demo) |
 | **ACE Opportunity ID** dengan kode kampanye "AWS CDS Agentic AI Hackathon -Sept. 2026" | **BELUM — harus dibuat user di AWS Partner Central** (README: `TBD`) |
 | Screenshot email SES di inbox → `docs/evidence/scenario-{a,b,c}-email.png` | Sudah |

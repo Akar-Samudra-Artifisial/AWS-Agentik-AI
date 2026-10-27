@@ -49,7 +49,7 @@ Gmail inbox screenshots have the recipient address blurred.
 | Repository | https://github.com/Akar-Samudra-Artifisial/AWS-Agentik-AI |
 | License | [MIT](LICENSE) |
 | Architecture diagram | [`docs/architecture.md`](docs/architecture.md) |
-| Demo video | TBD |
+| Demo video | https://www.youtube.com/watch?v=GprVqlJucqU (2:55, English narration) |
 | Live solution | https://dhv2ziygcntil.cloudfront.net |
 | ACE Opportunity ID | `TBD` |
 
