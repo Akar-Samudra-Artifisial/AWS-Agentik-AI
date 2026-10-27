@@ -31,6 +31,26 @@ class WebStack(Stack):
         )
         self.web_bucket = web_bucket
 
+        # Static export (trailingSlash) menulis `cases/index.html` dst.; origin S3 REST
+        # tidak punya default index di subfolder, jadi URI ditulis ulang di edge.
+        index_rewrite = cloudfront.Function(
+            self,
+            "web-index-rewrite",
+            runtime=cloudfront.FunctionRuntime.JS_2_0,
+            code=cloudfront.FunctionCode.from_inline(
+                "function handler(event) {\n"
+                "  var request = event.request;\n"
+                "  var uri = request.uri;\n"
+                "  if (uri.endsWith('/')) {\n"
+                "    request.uri = uri + 'index.html';\n"
+                "  } else if (!uri.split('/').pop().includes('.')) {\n"
+                "    request.uri = uri + '/index.html';\n"
+                "  }\n"
+                "  return request;\n"
+                "}\n"
+            ),
+        )
+
         self.distribution = cloudfront.Distribution(
             self,
             "web-distribution",
@@ -40,14 +60,23 @@ class WebStack(Stack):
                 origin=origins.S3BucketOrigin.with_origin_access_control(web_bucket),
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED,
+                function_associations=[
+                    cloudfront.FunctionAssociation(
+                        function=index_rewrite,
+                        event_type=cloudfront.FunctionEventType.VIEWER_REQUEST,
+                    )
+                ],
             ),
+            # Objek tak ada → S3 (OAC, tanpa ListBucket) membalas 403; tampilkan 404.html
+            # dengan status 404 alih-alih menyamarkannya sebagai Overview.
             error_responses=[
                 cloudfront.ErrorResponse(
-                    http_status=403,
-                    response_http_status=200,
-                    response_page_path="/index.html",
+                    http_status=status,
+                    response_http_status=404,
+                    response_page_path="/404.html",
                     ttl=Duration.seconds(0),
                 )
+                for status in (403, 404)
             ],
         )
         CfnOutput(self, "web-bucket-name", value=web_bucket.bucket_name)
