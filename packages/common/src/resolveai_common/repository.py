@@ -32,6 +32,7 @@ from .models import (
     Case,
     CaseStatus,
     Customer,
+    DeliveryStatus,
     Message,
     Order,
     ProcessedEvent,
@@ -288,6 +289,36 @@ class MessageRepository(_BaseRepository):
         item[MESSAGES_SORT_KEY] = self._sort_key(message)
         self._table.put_item(Item=item)
 
+    def update_delivery_status(
+        self, message: Message, status: DeliveryStatus, error: str | None = None
+    ) -> bool:
+        """Set ``delivery_status`` (and ``error`` when given) if it is still unchanged.
+
+        The update is conditional on the stored status equalling ``message.delivery_status``
+        so a concurrent webhook cannot be overwritten. Returns ``False`` when the condition
+        fails (status changed meanwhile).
+        """
+        names = {"#ds": "delivery_status"}
+        values: dict[str, Any] = {":new": status.value, ":cur": message.delivery_status.value}
+        expression = "SET #ds = :new"
+        if error:
+            names["#err"] = "error"
+            values[":err"] = error
+            expression += ", #err = :err"
+        try:
+            self._table.update_item(
+                Key={"case_id": message.case_id, MESSAGES_SORT_KEY: self._sort_key(message)},
+                UpdateExpression=expression,
+                ConditionExpression="attribute_exists(case_id) AND #ds = :cur",
+                ExpressionAttributeNames=names,
+                ExpressionAttributeValues=values,
+            )
+        except ClientError as exc:
+            if exc.response["Error"]["Code"] == "ConditionalCheckFailedException":
+                return False
+            raise
+        return True
+
     def list_for_case(
         self, case_id: str, limit: int | None = None, *, newest: bool = False
     ) -> list[Message]:
@@ -336,9 +367,7 @@ class AgentEventRepository(_BaseRepository):
             ScanIndexForward=True,
         )
         return [
-            AgentEvent.model_validate(
-                {k: v for k, v in item.items() if k != AGENT_EVENTS_SORT_KEY}
-            )
+            AgentEvent.model_validate({k: v for k, v in item.items() if k != AGENT_EVENTS_SORT_KEY})
             for item in items
         ]
 
