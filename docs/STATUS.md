@@ -6,13 +6,13 @@ Diperbarui oleh Claude Code setelah tiap milestone.
 |---|---|---|
 | M0 Fondasi & akses | selesai (AWS) | Akun `bayu-admin` us-east-1, `make bootstrap`/`deploy` (5 stack), `make seed` (5 pelanggan, 8 order, 25 kasus), Bedrock `us.anthropic.claude-sonnet-4-5-20250929-v1:0`, SES identity terverifikasi. |
 | M1 Messaging nyata | sebagian | Adapter SES/WhatsApp/SMS + dispatch/fallback + template diuji offline (Stubber). `scripts/send_test_message.py` ada. Belum: kirim nyata, parser inbound WA dari fixture SNS nyata (MSG-008; parser sementara ditulis dari docs). |
-| M2 RAG | sebagian | 7 dokumen kebijakan + `rag/eval/queries.yaml` (16 query), `scripts/ingest_kb.py` (`make ingest-kb`), `scripts/eval_rag.py` (`--static` → hit@4 16/16). Belum: Knowledge Base nyata, ingest & eval ke KB. |
-| M3 Agent | sebagian | Runtime AgentCore `resolveai_dev_agent-1oIRbq6w06` READY (direct_code_deploy, `scripts/stage_agentcore.sh`), ARN di SSM. Skenario A nyata lulus (Bedrock + 6 tool ok). Belum: eval 14 percakapan, KB nyata (masih policy statis). |
-| M4 Backend & orkestrasi | sebagian | API + dispatcher ter-deploy; `/simulate/inbound` → AgentCore → email SES nyata (skenario A). Belum: `make e2e` penuh (B/C), WhatsApp inbound. |
+| M2 RAG | selesai | KB Bedrock `N1IJHQI50F` ACTIVE (Titan V2 1024, S3 Vectors `resolveai-dev-kb-vectors`), ingestion 7 dok COMPLETE, `make eval-rag` hit@4 15/16 = 93,8% (`docs/evidence/eval_rag.md`). Langkah manual: `docs/kb-setup.md`. |
+| M3 Agent | sebagian | Runtime AgentCore `resolveai_dev_agent-1oIRbq6w06` READY (direct_code_deploy, `scripts/stage_agentcore.sh`), ARN di SSM. Skenario A, B-approve, B-reject, C nyata lulus via email. Tool dijalankan berurutan (`SequentialToolExecutor`, `agent/agent_factory.py:108`). Belum: eval 14 percakapan. |
+| M4 Backend & orkestrasi | sebagian | API + dispatcher ter-deploy; `/simulate/inbound` → AgentCore → email SES nyata (skenario A). `scripts/e2e.py --channel email` A/B-approve/B-reject/C lulus. Belum: WhatsApp inbound. |
 | M5 Dashboard | sebagian | Ter-deploy di CloudFront `https://dhv2ziygcntil.cloudfront.net`, terhubung API nyata (200). Belum: cek visual menyeluruh. |
 | M6 Hardening & submission | sebagian | `LICENSE` (MIT), `README.md` (Inggris), `docs/architecture.md` (Mermaid), git repo (remote GitHub `Akar-Samudra-Artifisial/AWS-Agentik-AI`). Belum: video, bukti pesan nyata, ACE Opportunity ID, persempit IAM. |
 
-Verifikasi terakhir (2026-10-27): `.venv/bin/pytest -q tests` → 233 passed, 9 skipped; `tests/agent` → 69 passed; ruff bersih; skenario A nyata di AWS lulus (13 agent_events, email terkirim).
+Verifikasi terakhir (2026-10-27): `.venv/bin/pytest -q tests` → 233 passed, 10 skipped; `tests/agent` → 70 passed; ruff bersih; skenario A/B/C nyata di AWS lulus via email (evidence `docs/evidence/scenario-*-case.json`).
 
 ## Keputusan
 (tanggal · keputusan · alasan)
@@ -33,10 +33,12 @@ Verifikasi terakhir (2026-10-27): `.venv/bin/pytest -q tests` → 233 passed, 9 
 - 2026-10-27 · Parameter SSM tambahan `kb/docs_bucket`, `kb/data_source_id` (atau env `KB_DOCS_BUCKET`/`KB_DATA_SOURCE_ID`); URL API via env `RESOLVEAI_API_URL` · tidak ada di PRD 01 §5.
 - 2026-10-27 · Model `us.anthropic.claude-sonnet-4-5-20250929-v1:0` (inference profile) · `claude-sonnet-5` AccessDenied untuk akun ini.
 - 2026-10-27 · `make deploy` membaca context dari env/`.env` (`SES_FROM_EMAIL`, `DEMO_RESET_ENABLED` default true, dst.) · deploy tanpa `-c` menghapus env runtime Lambda.
+- 2026-10-27 · Vector store KB = S3 Vectors · termurah (~<$0,01/bln); OpenSearch Serverless/Aurora ditolak karena biaya.
+- 2026-10-27 · Tool agen dijalankan berurutan, bukan paralel · eksekusi paralel Strands membuat `update_case` menimpa status `escalated`.
 - 2026-10-27 · Lisensi MIT, `Copyright (c) 2026 Akar Samudra Artifisial` · syarat lisensi open source.
 
 ## Blocker
-- Belum dikonfirmasi: Titan Embeddings V2 (KB), status WABA, SMS origination identity, ACE Opportunity ID.
+- Belum dikonfirmasi: status WABA, SMS origination identity, ACE Opportunity ID.
 
 ## Temuan / utang teknis
 - IAM masih longgar: kirim pesan `Resource:*` (`infra/stacks/compute_stack.py:88`), AgentCore `runtime/*` (`:73`) → persempit setelah ARN diketahui.
@@ -44,8 +46,12 @@ Verifikasi terakhir (2026-10-27): `.venv/bin/pytest -q tests` → 233 passed, 9 
 - Eval & e2e mengirim pesan nyata ke kontak demo (eval 14×3 via email; e2e default WhatsApp) dan bergantung pada `/demo/reset`.
 - `/demo/reset` tidak menghapus pelanggan non-seed buatan simulator.
 - Role runtime AgentCore (`AmazonBedrockAgentCoreSDKRuntime-us-east-1-ab2870b730`) dibuat toolkit + inline policy `resolveai-dev-agent-runtime` manual, di luar CDK.
+- KB, vector bucket, role `resolveai-dev-kb-role` dibuat manual di luar CDK (`docs/kb-setup.md`).
+- Eval RAG: query #10 (delivered tapi belum diterima → `escalation-policy`) miss; skenario C tetap eskalasi.
+- Skenario B diuji di runtime v2 (sebelum perbaikan tool berurutan); C di v3.
 - Sort key tabel `messages`/`agent_events` = `ts#msg_id`/`ts#seq` (infra); kode sekarang memakai konstanta di `repository.py` + test regresi mencocokkan `data_stack.py`.
 
 ## Bukti pesan nyata (untuk juri)
 (ID pesan WhatsApp/SMS/SES + lokasi screenshot)
 - 2026-10-27 · SES email · skenario A `CASE-20261027-CFD7` (ORD-1001, late_delivery → awaiting_customer), `delivery_status: sent` + `provider_message_id` SES. Screenshot inbox: belum (`docs/evidence/`).
+- 2026-10-27 · SES email · B-approve `CASE-20261027-CAAD` (resolved, execute_refund setelah approve, 3 email), B-reject `CASE-20261027-7089` (escalated, tanpa refund, 4 email), C `CASE-20261027-4FC8` (escalated high, 1 email) · `docs/evidence/scenario-*-case.json` (PII di-mask).
