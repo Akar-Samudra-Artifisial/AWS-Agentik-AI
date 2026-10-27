@@ -16,6 +16,7 @@ Verifikasi terakhir (2026-10-27): `.venv/bin/pytest -q tests` → 233 passed, 10
 
 ## Keputusan
 (tanggal · keputusan · alasan)
+- 2026-10-27 · Status webhook WA (BE-013) dikorelasikan lewat `messageId` AWS di envelope SNS (= `provider_message_id` pesan keluar), dicari via `recipient_id` → `customers.by_phone` → 5 kasus terbaru → 50 pesan terbaru; tanpa GSI baru. Status hanya maju (read/failed final), `failed` menyimpan `"<code> <title>"` di `error`; event status/account_update/security tidak membuat kasus · event nyata selalu memuat `messageId`, jadi tidak perlu fallback "pesan terbaru" yang rawan salah sasaran.
 - 2026-10-27 · Test messaging pakai `botocore.stub.Stubber` + injeksi `client`, bukan AWS nyata · PRD 05 §7 meminta unit test tanpa jaringan; pengiriman nyata diverifikasi manual via `send_test_message.py` di M1/M6.
 - 2026-10-27 · `send_test_message.py` dipanggil `python scripts/...` dan diberi executable bit · MSG-010 untuk uji manual + bukti juri.
 - 2026-10-27 · Bucket web dipindah dari DataStack ke WebStack · menghindari siklus dependensi antar-stack CDK.

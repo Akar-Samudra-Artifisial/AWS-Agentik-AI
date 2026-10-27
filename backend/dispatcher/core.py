@@ -46,7 +46,7 @@ from services.data import (
 )
 from services.deps import Deps
 
-from .inbound import NormalizedInbound, parse_whatsapp_sns_message
+from .inbound import NormalizedInbound, NormalizedStatus, parse_whatsapp_sns_event
 
 __all__ = [
     "FAILSAFE_TEXT",
@@ -61,6 +61,7 @@ __all__ = [
     "process_agent_turn",
     "process_approval_decided",
     "process_inbound",
+    "process_status",
     "run_agent_turn",
 ]
 
@@ -459,6 +460,94 @@ def process_agent_turn(
 
 
 # --------------------------------------------------------------------------- #
+# Delivery status webhooks (BE-013)
+# --------------------------------------------------------------------------- #
+
+# Status only moves forward; ``read`` and ``failed`` are final (equal rank).
+_STATUS_RANK = {
+    DeliveryStatus.QUEUED: 0,
+    DeliveryStatus.SENT: 1,
+    DeliveryStatus.DELIVERED: 2,
+    DeliveryStatus.READ: 3,
+    DeliveryStatus.FAILED: 3,
+}
+STATUS_LOOKUP_CASES = 5
+STATUS_LOOKUP_MESSAGES = 50
+
+
+def _find_outbound_message(deps: Deps, status: NormalizedStatus) -> Message | None:
+    """Locate the outbound WhatsApp message by AWS ``messageId`` (or wamid) among the
+    recipient's most recent cases; recipient -> customer ``by_phone`` -> cases."""
+    ids = {i for i in (status.provider_message_id, status.wamid) if i}
+    if not ids or status.recipient_e164 is None:
+        return None
+    customer = deps.repos.customers.find_by_phone(status.recipient_e164)
+    if customer is None:
+        return None
+    for case in deps.repos.cases.find_by_customer(customer.customer_id)[
+        :STATUS_LOOKUP_CASES
+    ]:
+        for m in deps.repos.messages.list_for_case(
+            case.case_id, limit=STATUS_LOOKUP_MESSAGES, newest=True
+        ):
+            if (
+                m.direction is MessageDirection.OUTBOUND
+                and m.channel is Channel.WHATSAPP
+                and m.provider_message_id in ids
+            ):
+                return m
+    return None
+
+
+def process_status(deps: Deps, status: NormalizedStatus) -> str:
+    """Apply one delivery status to its outbound message without moving it backwards.
+
+    Returns ``updated``, ``unchanged`` (not newer than the stored status or a concurrent
+    update won) or ``unmatched`` (no stored message, e.g. a test send outside any case).
+    Never creates cases or messages and never invokes the agent.
+    """
+    message = _find_outbound_message(deps, status)
+    if message is None:
+        _log.info(
+            "whatsapp status unmatched",
+            extra={
+                "provider_message_id": status.provider_message_id,
+                "status": status.status.value,
+            },
+        )
+        return "unmatched"
+    log = get_logger(__name__, message.case_id)
+    current = message.delivery_status
+    if _STATUS_RANK[status.status] <= _STATUS_RANK[current]:
+        log.info(
+            "whatsapp status not newer, skipped",
+            extra={
+                "msg_id": message.msg_id,
+                "current": current.value,
+                "new": status.status.value,
+            },
+        )
+        return "unchanged"
+    if not deps.repos.messages.update_delivery_status(
+        message, status.status, status.error
+    ):
+        log.info(
+            "whatsapp status changed concurrently", extra={"msg_id": message.msg_id}
+        )
+        return "unchanged"
+    log.info(
+        "whatsapp status applied",
+        extra={
+            "msg_id": message.msg_id,
+            "from": current.value,
+            "to": status.status.value,
+            "error": status.error,
+        },
+    )
+    return "updated"
+
+
+# --------------------------------------------------------------------------- #
 # Event routing
 # --------------------------------------------------------------------------- #
 
@@ -467,11 +556,15 @@ def handle_event(deps: Deps, event: dict[str, Any]) -> dict[str, Any]:
     """Route an SNS event or a direct payload (``simulate_inbound``, ``agent_turn``,
     ``approval_decided``) and return a small summary for logs/tests."""
     results: list[TurnResult | None] = []
+    status_results: list[str] = []
 
     if "Records" in event:
         for record in event["Records"]:
             sns = record.get("Sns") or {}
-            for inbound in parse_whatsapp_sns_message(sns.get("Message", "")):
+            parsed = parse_whatsapp_sns_event(sns.get("Message", ""))
+            for status in parsed.statuses:
+                status_results.append(process_status(deps, status))
+            for inbound in parsed.inbound:
                 results.append(process_inbound(deps, inbound))
     else:
         event_type = event.get("type")
@@ -496,10 +589,13 @@ def handle_event(deps: Deps, event: dict[str, Any]) -> dict[str, Any]:
         else:
             raise ValueError(f"unsupported dispatcher event type: {event_type!r}")
 
-    return {
+    summary: dict[str, Any] = {
         "processed": sum(1 for r in results if r is not None),
         "skipped": sum(1 for r in results if r is None),
         "turns": [
             {"case_id": r.case_id, "status": r.status} for r in results if r is not None
         ],
     }
+    if status_results:
+        summary["statuses"] = status_results
+    return summary
