@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logo-full-dark.svg">
+    <img src="docs/brand/logo-full.svg" alt="ResolveAI" height="64">
+  </picture>
+</p>
+
 # ResolveAI
 
 **An agentic customer-recovery agent on AWS that resolves delivery complaints end to end over WhatsApp, SMS, and email, and brings in a human only for risky decisions.**

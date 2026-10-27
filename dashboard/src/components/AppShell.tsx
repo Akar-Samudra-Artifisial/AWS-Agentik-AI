@@ -7,6 +7,7 @@ import { POLL_MS, isApiConfigured, useApprovals, useHealth } from "@/lib/api";
 import { TIME_ZONE_HINT } from "@/lib/format";
 import { IconClock, IconInbox, IconLock, IconOverview, IconSend, IconShieldCheck, IconWallet } from "./icons";
 import { cx } from "./ui";
+import { Wordmark } from "./Wordmark";
 
 const NAV = [
   { href: "/", label: "Overview", icon: IconOverview },
@@ -57,16 +58,16 @@ function PendingCount() {
   );
 }
 
+// Sumber: docs/brand/logo-mark.svg — gelembung chat yang "terselesaikan".
 function LogoMark() {
   return (
-    <span
-      aria-hidden="true"
-      className="grid size-8 place-items-center rounded-[9px] bg-accent-600 text-white shadow-sm ring-1 ring-accent-700/50 ring-inset"
-    >
-      <svg viewBox="0 0 24 24" className="size-[18px]" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 12.5 9 17.5 20 6.5" />
-      </svg>
-    </span>
+    <svg viewBox="0 0 32 32" aria-hidden="true" className="size-8 shrink-0">
+      <path
+        className="fill-accent-600"
+        d="M10 4h12a7 7 0 0 1 7 7v6a7 7 0 0 1-7 7h-8.2l-5.3 4.4A.9.9 0 0 1 7 27.7V23.3A7 7 0 0 1 3 17v-6a7 7 0 0 1 7-7Z"
+      />
+      <path d="M10.5 14.2l3.9 3.8 7.3-7.6" fill="none" stroke="white" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 
@@ -91,11 +92,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             Status & catatan menempel di dasar viewport (mt-auto). */}
         <div className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto">
           <div className="flex items-center justify-between gap-3 px-4 py-3.5 lg:px-5 lg:pt-5 lg:pb-6">
-            <Link href="/" className="flex items-center gap-2.5 rounded-lg">
+            <Link href="/" aria-label="ResolveAI — Supervisor console" className="flex items-center gap-2.5 rounded-lg">
               <LogoMark />
               <span className="leading-tight">
-                <span className="block text-[15px] font-semibold tracking-[-0.01em] text-zinc-950">ResolveAI</span>
-                <span className="block text-[11px] font-medium text-zinc-500">Supervisor console</span>
+                <Wordmark className="block h-[15px] w-auto" />
+                <span className="mt-1 block text-[11px] font-medium text-zinc-500">Supervisor console</span>
               </span>
             </Link>
             <div className="lg:hidden">
